@@ -25,7 +25,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 80),
               Image.asset(
-                'icons/ic_marketcheap_logo.png',
+                'assets/icons/ic_marketcheap_logo.png',
                 width: 120,
                 height: 120,
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'LoginScreen.dart';      // importa la pantalla de login
-import 'InicioScreen.dart';    // importa la pantalla después de login
+import 'LoginScreen.dart'; // Asegúrate de que LoginScreen.dart esté bien referenciado
+import 'InicioScreen.dart'; // Asegúrate de que InicioScreen.dart esté bien referenciado
 
 void main() {
   runApp(const MyApp());
@@ -14,10 +14,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MarketCheap',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/', // Pantalla inicial
       routes: {
-        '/': (context) => const LoginScreen(),
-        '/inicio': (context) => const InicioScreen(),
+        '/': (context) => const LoginScreen(), // Pantalla de Login
+        '/inicio': (context) => const InicioScreen(), // Pantalla de Hello World
       },
     );
   }

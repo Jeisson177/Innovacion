@@ -23,7 +23,7 @@ class InicioScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text('Cra. 7 #40 - 62', style: TextStyle(color: Colors.white, fontSize: 16)),
                   const Spacer(),
-                  Image.asset('icons/ic_cart.png', width: 24, height: 24),
+                  Image.asset('assets/icons/ic_cart.png', width: 24, height: 24),
                 ],
               ),
             ),
@@ -56,7 +56,7 @@ class InicioScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Image.asset('icons/ic_megaphone.png', width: 50, height: 50),
+                  Image.asset('assets/icons/ic_megaphone.png', width: 50, height: 50),
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
@@ -74,10 +74,10 @@ class InicioScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Image.asset('icons/ic_cleaning.png', width: 50, height: 50),
-                  Image.asset('icons/ic_food.png', width: 50, height: 50),
-                  Image.asset('icons/ic_beauty.png', width: 50, height: 50),
-                  Image.asset('icons/ic_health.png', width: 50, height: 50),
+                  Image.asset('assets/icons/ic_cleaning.png', width: 50, height: 50),
+                  Image.asset('assets/icons/ic_food.png', width: 50, height: 50),
+                  Image.asset('assets/icons/ic_beauty.png', width: 50, height: 50),
+                  Image.asset('assets/icons/ic_health.png', width: 50, height: 50),
                 ],
               ),
             ),
@@ -89,21 +89,21 @@ class InicioScreen extends StatelessWidget {
                 children: [
                   _productoTile(
                     context,
-                    'images/chocolatina_jet.jpg',
+                    'assets/images/chocolatina_jet.jpg',
                     'Chocolatina Jet leche',
                     'Bolsa x12 und - Tienda El Gran Bodegón',
                     '\$14.500',
                   ),
                   _productoTile(
                     context,
-                    'images/cafe_cappuccino.jpg',
+                    'assets/images/cafe_cappuccino.jpg',
                     'Colcafé CAPPUCCINO Vainilla',
                     '6 sobres x 13g - Tienda Ofertrones',
                     '\$5.850',
                   ),
                   _productoTile(
                     context,
-                    'images/huevos.png',
+                    'assets/images/huevos.png',
                     'Huevos',
                     'Canasta 30 huevos AA - Tienda Don José',
                     '\$14.500',
@@ -119,10 +119,10 @@ class InicioScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Image.asset('icons/ic_home.png', width: 30),
-                  Image.asset('icons/ic_search.png', width: 30),
-                  Image.asset('icons/ic_favorites.png', width: 30),
-                  Image.asset('icons/ic_profile.png', width: 30),
+                  Image.asset('assets/icons/ic_home.png', width: 30),
+                  Image.asset('assets/icons/ic_search.png', width: 30),
+                  Image.asset('assets/icons/ic_favorites.png', width: 30),
+                  Image.asset('assets/icons/ic_profile.png', width: 30),
                 ],
               ),
             ),
@@ -154,7 +154,7 @@ class InicioScreen extends StatelessWidget {
               ],
             ),
           ),
-          Image.asset('icons/ic_add.png', width: 30, height: 30),
+          Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
         ],
       ),
     );
