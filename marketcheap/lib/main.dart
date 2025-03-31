@@ -1,9 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'LoginScreen.dart'; // Asegúrate de que LoginScreen.dart esté bien referenciado
-import 'InicioScreen.dart'; // Asegúrate de que InicioScreen.dart esté bien referenciado
+import 'package:marketcheap/firebase_options.dart';
+import 'LoginScreen.dart'; 
+import 'InicioScreen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
