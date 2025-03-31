@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ProductList.dart';
+import 'package:marketcheap/ProductList.dart';
+import 'package:marketcheap/ShoppinfCart.dart';
 
 class OfertasScreen extends StatelessWidget {
   final List<Producto> ofertas = [

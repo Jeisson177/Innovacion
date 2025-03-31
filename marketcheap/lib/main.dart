@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/ShoppinfCart.dart';
 import 'package:provider/provider.dart';
 import 'LoginScreen.dart';
 import 'InicioScreen.dart';
 import 'OfertasScreen.dart';
 import 'CartScreen.dart';
-import 'ShoppingCart.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => const LoginScreen(),
           '/inicio': (context) => const InicioScreen(),
-          '/ofertas': (context) => const OfertasScreen(),
+          '/ofertas': (context) => OfertasScreen(),
           '/carrito': (context) => const CartScreen(),
         },
       ),

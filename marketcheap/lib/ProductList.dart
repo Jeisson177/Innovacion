@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/ShoppinfCart.dart';
 import 'package:provider/provider.dart';
-import 'ShoppingCart.dart';
 
 class ProductList extends StatelessWidget {
   final List<Producto> productos;
