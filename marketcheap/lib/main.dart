@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/CartScreen.dart';
 import 'package:marketcheap/OfertasScreen.dart';
+import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/ShoppinfCart.dart';
 import 'package:marketcheap/firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'LoginScreen.dart'; // Asegúrate de que LoginScreen.dart esté bien referenciado
-import 'InicioScreen.dart'; // Asegúrate de que InicioScreen.dart esté bien referenciado
+import 'LoginScreen.dart'; 
+import 'InicioScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           '/inicio': (context) => const InicioScreen(),
           '/ofertas': (context) => OfertasScreen(),
           '/carrito': (context) => const CartScreen(),
+          '/registro': (context) => const RegisterScreen(),
         },
       ),
     );

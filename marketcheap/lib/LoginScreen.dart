@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/util/auth.dart';
 import 'InicioScreen.dart';
-
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
+  void _handleSocialLogin(BuildContext context, Future Function() loginMethod) async {
+    final userCredential = await loginMethod();
+    if (userCredential != null) {
+      Navigator.pushReplacementNamed(context, '/inicio');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error al iniciar sesión")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authService = Auth();
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -77,9 +90,35 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Botón Google
+              SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: OutlinedButton.icon(
+                  icon: Image.asset('assets/icons/google.png', height: 24),
+                  label: const Text("Iniciar sesión con Google"),
+                  onPressed: () => _handleSocialLogin(context, authService.signInWithGoogle),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Botón Facebook
+              SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: OutlinedButton.icon(
+                  icon: Image.asset('assets/icons/facebook.png', height: 24),
+                  label: const Text("Iniciar sesión con Facebook"),
+                  onPressed: () => _handleSocialLogin(context, authService.signInWithFacebook),
+                ),
+              ),
+
+              const SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  // Acción para registrarse
+                  Navigator.pushNamed(context, '/registro');
                 },
                 child: const Text(
                   '¿No tienes cuenta? Regístrate',

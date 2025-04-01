@@ -16,7 +16,7 @@ class InicioScreen extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.white, Colors.green],
+                  colors: [Color.fromARGB(255, 98, 195, 107), Color.fromARGB(255, 40, 132, 44)],
                 ),
               ),
               child: Row(
@@ -57,7 +57,7 @@ class InicioScreen extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Colors.white, Colors.green],
+                  colors: [Color.fromARGB(255, 98, 195, 107), Color.fromARGB(255, 40, 132, 44)],
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
