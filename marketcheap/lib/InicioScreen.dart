@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/ShoppinfCart.dart';
+import 'package:provider/provider.dart';
 
 class InicioScreen extends StatelessWidget {
   const InicioScreen({super.key});
@@ -23,7 +25,12 @@ class InicioScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text('Cra. 7 #40 - 62', style: TextStyle(color: Colors.white, fontSize: 16)),
                   const Spacer(),
-                  Image.asset('assets/icons/ic_cart.png', width: 24, height: 24),
+                  IconButton(
+                    icon: Image.asset('assets/icons/ic_cart.png', width: 24, height: 24),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/carrito');
+                    },
+                  ),
                 ],
               ),
             ),
@@ -133,6 +140,8 @@ class InicioScreen extends StatelessWidget {
   }
 
   Widget _productoTile(BuildContext context, String image, String title, String description, String price) {
+    final cart = Provider.of<ShoppingCart>(context, listen: false);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(10),
@@ -154,7 +163,23 @@ class InicioScreen extends StatelessWidget {
               ],
             ),
           ),
-          Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
+          IconButton(
+            icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
+            onPressed: () {
+              cart.addItem(Producto(
+                imagen: image,
+                titulo: title,
+                descripcion: description,
+                precio: price,
+              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$title añadido al carrito'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
