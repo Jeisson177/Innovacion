@@ -6,7 +6,7 @@ import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/ShoppinfCart.dart';
 import 'package:marketcheap/firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'LoginScreen.dart'; 
+import 'LoginScreen.dart';
 import 'InicioScreen.dart';
 
 void main() async {
