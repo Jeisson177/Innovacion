@@ -174,7 +174,18 @@ class InicioScreen extends StatelessWidget {
                     child: Image.asset('assets/icons/ic_search.png', width: 30),
                   ),
                   Image.asset('assets/icons/ic_favorites.png', width: 30),
-                  Image.asset('assets/icons/ic_profile.png', width: 30),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/perfil',
+                      ); // Redirige a la pantalla de perfil
+                    },
+                    child: Image.asset(
+                      'assets/icons/ic_profile.png',
+                      width: 30,
+                    ),
+                  ),
                 ],
               ),
             ),

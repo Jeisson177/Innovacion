@@ -5,14 +5,16 @@ import 'package:geolocator/geolocator.dart';
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
-  GoogleMapController? mapController;
-  LatLng? _initialPosition; // Ahora es nullable para evitar usar un valor incorrecto
-  Set<Marker> _markers = {};
+  late GoogleMapController mapController;
+  LatLng _initialPosition = LatLng(4.6097, -74.0817); // Bogotá
+
+  Set<Marker> _markers = {}; // Lista de marcadores en el mapa
 
   @override
   void initState() {
@@ -24,61 +26,38 @@ class _MapScreenState extends State<MapScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    try {
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _showError("El servicio de ubicación está desactivado.");
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
         return;
       }
-
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.deniedForever) {
-          _showError("Los permisos de ubicación están denegados permanentemente.");
-          return;
-        }
-      }
-
-      Position position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _initialPosition = LatLng(position.latitude, position.longitude);
-        _addMarkers(position.latitude, position.longitude);
-      });
-
-      if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(_initialPosition!, 14.0),
-        );
-      }
-    } catch (e) {
-      _showError("Error al obtener la ubicación: $e");
     }
+
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _initialPosition = LatLng(position.latitude, position.longitude);
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    if (_initialPosition != null) {
-      mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(_initialPosition!, 14.0),
-      );
-    }
+    _addMarkers();
   }
 
-  void _addMarkers(double lat, double lng) {
+  void _addMarkers() {
     setState(() {
       _markers.add(Marker(
         markerId: MarkerId('1'),
-        position: LatLng(lat, lng),
-        infoWindow: InfoWindow(title: 'Tu ubicación'),
+        position: LatLng(4.6097, -74.0817), // Bogotá
+        infoWindow: InfoWindow(title: 'Tienda 1'),
       ));
     });
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
   }
 
   @override
@@ -88,18 +67,16 @@ class _MapScreenState extends State<MapScreen> {
         title: Text("Tiendas registradas"),
         backgroundColor: Colors.green[700],
       ),
-      body: _initialPosition == null
-          ? Center(child: CircularProgressIndicator())
-          : GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: _initialPosition!,
-                zoom: 14.0,
-              ),
-              markers: _markers,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-            ),
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: _initialPosition,
+          zoom: 14.0,
+        ),
+        markers: _markers,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+      ),
     );
   }
 }
