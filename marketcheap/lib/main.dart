@@ -1,13 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // <-- Importa Geolocator
-import 'package:marketcheap/CartScreen.dart';
-import 'package:marketcheap/MapScreen.dart';
-import 'package:marketcheap/OfertasScreen.dart';
-import 'package:marketcheap/ProfileScreen.dart';
-import 'package:marketcheap/RegisterScreen.dart';
-import 'package:marketcheap/ShoppinfCart.dart';
-import 'package:marketcheap/firebase_options.dart';
+import 'package:marketcheap/Screens/Consumidor/CartScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/RegisterScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
+import 'package:marketcheap/util/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'LoginScreen.dart';
 import 'InicioScreen.dart';
