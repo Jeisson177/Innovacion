@@ -150,13 +150,6 @@ class InicioScreen extends StatelessWidget {
                   ),
                   _productoTile(
                     context,
-                    'assets/images/cafe_cappuccino.jpg',
-                    'Colcafé CAPPUCCINO Vainilla',
-                    '6 sobres x 13g - Tienda Ofertrones',
-                    '\$5.850',
-                  ),
-                  _productoTile(
-                    context,
                     'assets/images/agua_cristal.jpg',
                     'Botellón de agua Cristal',
                     'x20 Lts - Tienda El Ahorro',
