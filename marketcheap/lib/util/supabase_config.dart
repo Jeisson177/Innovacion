@@ -1,0 +1,2 @@
+const String supabaseUrl = 'https://jaegnfeldwnjhdlkkrmu.supabase.co';
+const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZWduZmVsZHduamhkbGtrcm11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTkwMjEsImV4cCI6MjA1OTE5NTAyMX0.s_BhnGawnto6xWRKyxqY1DKWPxAfOoraS_LGUTeSO88';

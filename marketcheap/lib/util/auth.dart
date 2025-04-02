@@ -1,104 +1,103 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
-
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart' as provider_package;
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient, Supabase, AuthProvider;
 
 
 class Auth {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final supabase = Supabase.instance.client;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-  // Registro con email y contraseña
-  Future<String?> createAccount(String email, String password) async {
+  // 1. Iniciar sesión con email y contraseña
+  Future<User?> signInWithEmail(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      return userCredential.user?.uid;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('La contraseña es muy débil.');
-      } else if (e.code == 'email-already-in-use') {
-        print('Ya existe una cuenta con ese correo.');
-      }
-    } catch (e) {
-      print(e);
-    }
-    return null;
-  }
-
-  // Inicio de sesión con email y contraseña
-  Future<String?> signInWithEmail(String email, String password) async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user?.uid;
+      return response.user;
     } catch (e) {
       print('Error al iniciar sesión: $e');
       return null;
     }
   }
 
-  // Inicio de sesión con Google
-  Future<UserCredential?> signInWithGoogle() async {
+  // 2. Registrarse con email
+  Future<User?> signUpWithEmail(String email, String password) async {
     try {
-      if (kIsWeb) {
-        final googleProvider = GoogleAuthProvider();
-        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
-      } else {
-        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-        if (googleUser == null) return null;
-
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        return await FirebaseAuth.instance.signInWithCredential(credential);
-      }
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      return response.user;
     } catch (e) {
-      print('Error en Google Sign-In: $e');
+      print('Error al registrarse: $e');
       return null;
     }
   }
 
-
-  // Inicio de sesión con Facebook
-  Future<UserCredential?> signInWithFacebook() async {
+  // 3. Iniciar sesión con proveedor (Google/Facebook)
+  Future<void> signInWithProvider(String provider) async {
+   
     try {
-      if (kIsWeb) {
-        final facebookProvider = FacebookAuthProvider();
-        return await FirebaseAuth.instance.signInWithPopup(facebookProvider);
-      } else {
-        final LoginResult result = await FacebookAuth.instance.login();
-        if (result.status != LoginStatus.success) return null;
-
-        final OAuthCredential facebookCredential =
-            FacebookAuthProvider.credential(result.accessToken!.token);
-
-        return await FirebaseAuth.instance.signInWithCredential(facebookCredential);
+      OAuthProvider? providerEnum;
+      switch (provider.toLowerCase()) {
+        case 'google':
+          providerEnum = OAuthProvider.google;
+          break;
+        case 'facebook':
+          providerEnum = OAuthProvider.facebook;
+          break;
+        default:
+          throw Exception('Proveedor no soportado');
       }
+
+      await supabase.auth.signInWithOAuth(
+        providerEnum!,
+        redirectTo: 'com.googleusercontent.apps.644370726477-l0a05u6pfsjnhggefmqcb13pgrkvm3u8:/auth/callback',
+      );
     } catch (e) {
-      print('Error en Facebook Sign-In: $e');
-      return null;
+      print('Error con $provider: $e');
     }
   }
 
-
-  // Cerrar sesión
+  // 4. Cerrar sesión
   Future<void> signOut() async {
-    await _auth.signOut();
-    await GoogleSignIn().signOut(); // opcional
-    await FacebookAuth.instance.logOut(); // opcional
+    await supabase.auth.signOut();
   }
 
-  // Obtener usuario actual
+  // 5. Obtener usuario actual
   User? getCurrentUser() {
-    return _auth.currentUser;
+    return supabase.auth.currentUser;
   }
+
+  // 6. Verificar si hay sesión activa
+  bool isLoggedIn() {
+    return supabase.auth.currentUser != null;
+  }
+
+  // 7. Enviar enlace mágico (opcional)
+  Future<void> sendMagicLink(String email) async {
+    try {
+      await supabase.auth.signInWithOtp(
+        email: email,
+        emailRedirectTo: 'tu-scheme://auth-callback',
+      );
+    } catch (e) {
+      print('Error al enviar enlace mágico: $e');
+    }
+  }
+  Future<User?> signInWithGoogle() async {
+  await signInWithProvider('google');
+  return supabase.auth.currentUser;
+}
+
+Future<User?> signInWithFacebook() async {
+  await signInWithProvider('facebook');
+  return supabase.auth.currentUser;
+}
+
+
+
 }

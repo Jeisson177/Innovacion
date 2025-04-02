@@ -1,46 +1,41 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // <-- Importa Geolocator
-import 'package:marketcheap/CartScreen.dart';
-import 'package:marketcheap/MapScreen.dart';
-import 'package:marketcheap/OfertasScreen.dart';
-import 'package:marketcheap/ProfileScreen.dart';
-import 'package:marketcheap/RegisterScreen.dart';
-import 'package:marketcheap/ShoppinfCart.dart';
-import 'package:marketcheap/firebase_options.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:marketcheap/Screens/Consumidor/CartScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/RegisterScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
+import 'package:marketcheap/util/supabase_config.dart'; // nuevo archivo con config
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'LoginScreen.dart';
-import 'InicioScreen.dart';
+import 'Screens/Consumidor/InicioScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+
+  // Inicializar Supabase
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
-  // Solicitar permisos de geolocalización antes de lanzar la app
+  // Solicitar permisos de geolocalización
   await _initLocationPermissions();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 Future<void> _initLocationPermissions() async {
-  bool serviceEnabled;
-  LocationPermission permission;
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return;
 
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    return;
-  }
-
-  permission = await Geolocator.checkPermission();
+  LocationPermission permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
+    if (permission == LocationPermission.deniedForever) return;
   }
 }
 

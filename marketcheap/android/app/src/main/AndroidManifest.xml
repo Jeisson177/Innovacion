@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.marketcheap">
 
-    <!-- Permisos de ubicación -->
+
+    <!-- Permisos -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
@@ -10,21 +13,67 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- Desactivar Impeller -->
+        <!-- Impeller -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="false"/>
+            android:value="false" />
 
-        <!-- API de Google Maps -->
+        <!-- Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBthbDFH1bk6xgpb4Uyd3Fei-EpaAxxwi8" />
 
-        <!-- Habilitar OnBackInvokedCallback -->
+        <!-- Android 13+ back -->
         <meta-data 
             android:name="android:enableOnBackInvokedCallback" 
             android:value="true" />
 
+        <!-- Facebook SDK -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+        <meta-data
+            android:name="com.facebook.sdk.FacebookSdkAutoInitEnabled"
+            android:value="true" />
+        <meta-data
+            android:name="com.facebook.sdk.FacebookSdkAutoLogAppEventsEnabled"
+            android:value="true" />
+        <meta-data
+            android:name="com.facebook.sdk.FacebookAppEventsEnabled"
+            android:value="true" />
+
+        <!-- Facebook Activities -->
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:exported="true"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme" />
+
+
+        <!-- Facebook Content Provider -->
+        <provider
+            android:name="com.facebook.FacebookContentProvider"
+            android:authorities="com.facebook.app.FacebookContentProvider.3081166398713102"
+            android:exported="true" />
+
+        <!-- Facebook Custom Tabs -->
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="fb3081166398713102" />
+            </intent-filter>
+        </activity>
+
+        <!-- MAIN FLUTTER ACTIVITY -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -35,26 +84,40 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
+            <!-- Tema normal -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
 
+            <!-- Launcher -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Google OAuth Redirection -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="com.googleusercontent.apps.644370726477-l0a05u6pfsjnhggefmqcb13pgrkvm3u8"
+                    android:host="auth/callback"/>
+            </intent-filter>
+
         </activity>
 
+        <!-- Flutter Embedding -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
+    <!-- Permitir detectar apps instaladas -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
         </intent>
     </queries>
-
 </manifest>
