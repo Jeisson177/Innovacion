@@ -14,18 +14,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final authService = Auth();
-
+  String? _errorMessage;
   void _handleEmailLogin() async {
   final email = emailController.text.trim();
   final password = passwordController.text.trim();
-
+  String mensaje;
   try {
     final userCredential = await authService.signInWithEmail(email, password);
     if (userCredential != null) {
       Navigator.pushReplacementNamed(context, '/inicio');
     }
   } on FirebaseAuthException catch (e) {
-    String mensaje;
+    
     switch (e.code) {
       case 'user-not-found':
         mensaje = 'Usuario no encontrado. Verifica el correo.';
@@ -42,7 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
       default:
         mensaje = 'Error al iniciar sesión. Intenta de nuevo.';
     }
-
+    setState(() {
+      _errorMessage = mensaje;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(mensaje)),
     );
@@ -50,6 +52,9 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Error desconocido al iniciar sesión.')),
     );
+    setState(() {
+      _errorMessage = 'Error al iniciar sesión';
+    });
   }
 }
 
@@ -88,7 +93,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
               const Text('MarketCheap', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
-
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                ),
               // Campo de correo
               TextField(
                 controller: emailController,
@@ -122,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Text('Iniciar sesión', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
-
+              
               const SizedBox(height: 20),
 
               // Login con Google
