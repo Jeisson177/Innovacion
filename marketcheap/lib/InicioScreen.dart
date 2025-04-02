@@ -164,7 +164,7 @@ class InicioScreen extends StatelessWidget {
                   ),
                   _productoTile(
                     context,
-                    'assets/images/alcohol_anticeptico.jpg',
+                    'assets/images/alcohol_anticeptico.png',
                     'Alcohol antiséptico MK',
                     '350 ml- Ahorra ya',
                     '\$5.200',
