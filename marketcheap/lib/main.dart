@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/CartScreen.dart';
+import 'package:marketcheap/MapScreen.dart';
 import 'package:marketcheap/OfertasScreen.dart';
 import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/ShoppinfCart.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
           '/ofertas': (context) => OfertasScreen(),
           '/carrito': (context) => const CartScreen(),
           '/registro': (context) => const RegisterScreen(),
+          '/mapa': (context) => const MapScreen(),
         },
       ),
     );

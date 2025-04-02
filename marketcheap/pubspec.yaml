@@ -19,6 +19,9 @@ dependencies:
   flutter_facebook_auth: ^6.0.4
   flutter_form_builder: ^9.1.1
   form_builder_validators: ^11.1.2
+  geolocator: ^10.1.0 # O la última versión disponible
+  google_maps_flutter: ^2.5.0
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   change_app_package_name: ^1.1.0
