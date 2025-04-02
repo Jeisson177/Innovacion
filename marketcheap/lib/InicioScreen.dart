@@ -166,31 +166,49 @@ class InicioScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Image.asset('assets/icons/ic_home.png', width: 30),
-                  GestureDetector(
+                  _navButton(
+                    context,
+                    iconPath: 'assets/icons/ic_home.png',
+                    onTap: () {}, // Ya estás en inicio
+                  ),
+                  _navButton(
+                    context,
+                    iconPath: 'assets/icons/ic_search.png',
                     onTap: () {
                       Navigator.pushNamed(context, '/mapa');
                     },
-                    child: Image.asset('assets/icons/ic_search.png', width: 30),
                   ),
-                  Image.asset('assets/icons/ic_favorites.png', width: 30),
-                  GestureDetector(
+                  _navButton(
+                    context,
+                    iconPath: 'assets/icons/ic_favorites.png',
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/perfil',
-                      ); // Redirige a la pantalla de perfil
+                      // Acción para ofertas
                     },
-                    child: Image.asset(
-                      'assets/icons/ic_profile.png',
-                      width: 30,
-                    ),
+                  ),
+                  _navButton(
+                    context,
+                    iconPath: 'assets/icons/ic_profile.png',
+                    onTap: () {
+                      Navigator.pushNamed(context, '/perfil');
+                    },
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+Widget _navButton(BuildContext context,
+      {required String iconPath, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      splashColor: Colors.transparent,
+      highlightColor: const Color.fromARGB(59, 9, 2, 2), // Color oscuro al presionar
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        child: Image.asset(iconPath, width: 30, height: 30),
       ),
     );
   }

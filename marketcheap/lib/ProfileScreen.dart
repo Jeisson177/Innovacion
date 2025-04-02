@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const InicioScreen()),
         );
         break;
-      case 1: // Mapa (ic_search)
+      case 1: // Mapa
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MapScreen()),
@@ -100,48 +100,54 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
 
-      // Barra de navegación inferior con gradiente
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 98, 195, 107),
-              Color.fromARGB(255, 40, 132, 44),
+      // Barra de navegación inferior con gradiente usando Stack
+      bottomNavigationBar: Stack(
+        children: [
+          Container(
+            height: kBottomNavigationBarHeight,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 98, 195, 107),
+                  Color.fromARGB(255, 40, 132, 44),
+                ],
+              ),
+            ),
+          ),
+          BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white70,
+            showUnselectedLabels: true,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            onTap: (index) => _onItemTapped(context, index),
+            items: [
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/icons/ic_home.png", width: 24, height: 24),
+                label: "Inicio",
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/icons/ic_search.png", width: 24, height: 24),
+                label: "Mapa",
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/icons/ic_favorites.png", width: 24, height: 24),
+                label: "Ofertas",
+              ),
+              BottomNavigationBarItem(
+                icon: Image.asset("assets/icons/ic_profile.png", width: 24, height: 24),
+                label: "Perfil",
+              ),
             ],
           ),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.transparent, // Hace que se vea el gradiente
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
-          showUnselectedLabels: true,
-          elevation: 0,
-          onTap: (index) => _onItemTapped(context, index),
-          items: [
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/ic_home.png", width: 24, height: 24),
-              label: "Inicio",
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/ic_search.png", width: 24, height: 24),
-              label: "Mapa",
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/ic_favorites.png", width: 24, height: 24),
-              label: "Ofertas",
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/ic_profile.png", width: 24, height: 24),
-              label: "Perfil",
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
   // Widget para los botones de servicios
-  Widget _buildServiceButton(IconData icon, String text) {
+  static Widget _buildServiceButton(IconData icon, String text) {
     return Column(
       children: [
         Container(
