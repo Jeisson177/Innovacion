@@ -1,9 +1,63 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/util/auth.dart';
 import 'InicioScreen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final authService = Auth();
+  String? _errorMessage;
+  void _handleEmailLogin() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+  String mensaje;
+  try {
+    final userCredential = await authService.signInWithEmail(email, password);
+    if (userCredential != null) {
+      Navigator.pushReplacementNamed(context, '/inicio');
+    }
+  } on FirebaseAuthException catch (e) {
+    
+    switch (e.code) {
+      case 'user-not-found':
+        mensaje = 'Usuario no encontrado. Verifica el correo.';
+        break;
+      case 'wrong-password':
+        mensaje = 'Contraseña incorrecta.';
+        break;
+      case 'invalid-email':
+        mensaje = 'Correo electrónico inválido.';
+        break;
+      case 'user-disabled':
+        mensaje = 'Esta cuenta ha sido desactivada.';
+        break;
+      default:
+        mensaje = 'Error al iniciar sesión. Intenta de nuevo.';
+    }
+    setState(() {
+      _errorMessage = mensaje;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensaje)),
+    );
+  } catch (_) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error desconocido al iniciar sesión.')),
+    );
+    setState(() {
+      _errorMessage = 'Error al iniciar sesión';
+    });
+  }
+}
+
 
   void _handleSocialLogin(BuildContext context, Future Function() loginMethod) async {
     final userCredential = await loginMethod();
@@ -18,8 +72,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Auth();
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -37,61 +89,55 @@ class LoginScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 80),
-              Image.asset(
-                'assets/icons/ic_marketcheap_logo.png',
-                width: 120,
-                height: 120,
-              ),
+              Image.asset('assets/icons/ic_marketcheap_logo.png', width: 120, height: 120),
               const SizedBox(height: 10),
-              const Text(
-                'MarketCheap',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              const Text('MarketCheap', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              // Campo de correo
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   hintText: 'Correo electrónico',
                   contentPadding: const EdgeInsets.all(12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 15),
+
+              // Campo de contraseña
               TextField(
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Contraseña',
                   contentPadding: const EdgeInsets.all(12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 30),
+
+              // Botón de login con email
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/inicio');
-                  },
-                  child: const Text(
-                    'Iniciar sesión',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  onPressed: _handleEmailLogin,
+                  child: const Text('Iniciar sesión', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
+              
               const SizedBox(height: 20),
 
-              // Botón Google
+              // Login con Google
               SizedBox(
                 width: double.infinity,
                 height: 45,
@@ -104,7 +150,7 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Botón Facebook
+              // Login con Facebook
               SizedBox(
                 width: double.infinity,
                 height: 45,
@@ -117,16 +163,10 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/registro');
-                },
+                onTap: () => Navigator.pushNamed(context, '/registro'),
                 child: const Text(
                   '¿No tienes cuenta? Regístrate',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               )
             ],

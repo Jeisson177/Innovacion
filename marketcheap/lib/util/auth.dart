@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
+
 
 class Auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -42,38 +46,49 @@ class Auth {
   // Inicio de sesión con Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null;
+      if (kIsWeb) {
+        final googleProvider = GoogleAuthProvider();
+        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      } else {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      return await _auth.signInWithCredential(credential);
+        return await FirebaseAuth.instance.signInWithCredential(credential);
+      }
     } catch (e) {
       print('Error en Google Sign-In: $e');
       return null;
     }
   }
 
+
   // Inicio de sesión con Facebook
   Future<UserCredential?> signInWithFacebook() async {
     try {
-      final LoginResult result = await FacebookAuth.instance.login();
-      if (result.status != LoginStatus.success) return null;
+      if (kIsWeb) {
+        final facebookProvider = FacebookAuthProvider();
+        return await FirebaseAuth.instance.signInWithPopup(facebookProvider);
+      } else {
+        final LoginResult result = await FacebookAuth.instance.login();
+        if (result.status != LoginStatus.success) return null;
 
-      final OAuthCredential facebookCredential =
-          FacebookAuthProvider.credential(result.accessToken!.token);
+        final OAuthCredential facebookCredential =
+            FacebookAuthProvider.credential(result.accessToken!.token);
 
-      return await _auth.signInWithCredential(facebookCredential);
+        return await FirebaseAuth.instance.signInWithCredential(facebookCredential);
+      }
     } catch (e) {
       print('Error en Facebook Sign-In: $e');
       return null;
     }
   }
+
 
   // Cerrar sesión
   Future<void> signOut() async {

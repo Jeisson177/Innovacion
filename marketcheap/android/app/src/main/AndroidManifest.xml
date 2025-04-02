@@ -1,13 +1,29 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.marketcheap">
+
+    <!-- Permisos de ubicación -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:label="marketcheap"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- DESACTIVAR IMPELLER -->
+        <!-- Desactivar Impeller -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false"/>
+
+        <!-- API de Google Maps -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBthbDFH1bk6xgpb4Uyd3Fei-EpaAxxwi8" />
+
+        <!-- Habilitar OnBackInvokedCallback -->
+        <meta-data 
+            android:name="android:enableOnBackInvokedCallback" 
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"
@@ -20,8 +36,8 @@
             android:windowSoftInputMode="adjustResize">
 
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme" />
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -40,4 +56,5 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+
 </manifest>
