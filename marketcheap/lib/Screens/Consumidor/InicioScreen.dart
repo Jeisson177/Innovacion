@@ -1,9 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
-import 'package:provider/provider.dart';
+import 'package:marketcheap/services/ProductoService.dart';
 
-class InicioScreen extends StatelessWidget {
+import '../../entities/Producto.dart';
+
+class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
+
+  @override
+  _InicioScreenState createState() => _InicioScreenState();
+}
+
+class _InicioScreenState extends State<InicioScreen> {
+  final ProductoService _productoService = ProductoService();
+  List<Producto> _productos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProductos();
+  }
+
+  // Cargar los productos desde Firestore
+  Future<void> _loadProductos() async {
+    List<Producto> productos = await _productoService.getProductos();
+    setState(() {
+      _productos = productos;
+    });
+  }
+
+  // Crear el tile de producto (para el ListView)
+  Widget _productoTile(
+    BuildContext context,
+    String image,
+    String title,
+    String description,
+    String price,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDED7D7),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Image.network(image, width: 80, height: 80),  // Usar Image.network para cargar desde URL
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(description, style: const TextStyle(fontSize: 14)),
+                Text(
+                  price,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +113,6 @@ class InicioScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             // Search bar
             Container(
               margin: const EdgeInsets.all(10),
@@ -60,7 +128,6 @@ class InicioScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             // Promo banner
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -91,137 +158,23 @@ class InicioScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Categorías
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Image.asset(
-                    'assets/icons/ic_cleaning.png',
-                    width: 50,
-                    height: 50,
-                  ),
-                  Image.asset(
-                    'assets/icons/ic_food.png',
-                    width: 50,
-                    height: 50,
-                  ),
-                  Image.asset(
-                    'assets/icons/ic_beauty.png',
-                    width: 50,
-                    height: 50,
-                  ),
-                  Image.asset(
-                    'assets/icons/ic_health.png',
-                    width: 50,
-                    height: 50,
-                  ),
-                ],
-              ),
-            ),
-
             // Productos scrollables
             Expanded(
-              child: ListView(
+              child: ListView.builder(
                 padding: const EdgeInsets.all(10),
-                children: [
-                  _productoTile(
+                itemCount: _productos.length,
+                itemBuilder: (context, index) {
+                  Producto producto = _productos[index];
+                  return _productoTile(
                     context,
-                    'assets/images/chocolatina_jet.jpg',
-                    'Chocolatina Jet leche',
-                    'Bolsa x12 und - Tienda El Gran Bodegón',
-                    '\$14.500',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/cafe_cappuccino.jpg',
-                    'Colcafé CAPPUCCINO Vainilla',
-                    '6 sobres x 13g - Tienda Ofertrones',
-                    '\$5.850',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/huevos.png',
-                    'Huevos',
-                    'Canasta 30 huevos AA - Tienda Don José',
-                    '\$14.500',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/agua_cristal.jpg',
-                    'Botellón de agua Cristal',
-                    'x20 Lts - Tienda El Ahorro',
-                    '\$8.000',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/alcohol_anticeptico.png',
-                    'Alcohol antiséptico MK',
-                    '350 ml- Ahorra ya',
-                    '\$5.200',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/electrolit.jpg',
-                    'Electrolit mora azul',
-                    '15 ml - Tienda de bolsillo',
-                    '\$8.900',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/arroz.jpg',
-                    'Arroz Diana',
-                    '5.000 g - Tienda la rebaja',
-                    '\$4.600',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/chocolate_corona.jpg',
-                    'Chocolate corona clavos y canela',
-                    '500 g, 16 porciones por envase - Economia',
-                    '\$8.900',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/cepillo.jpg',
-                    'Cepillo de dientes Colgate 360°',
-                    'x5 unidades - Tienda la ganancia',
-                    '\$35.700',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/papel.jpg',
-                    'Papel Higienico Familia Acolcha MAX',
-                    'x4 unidades - Tienda del ahorro',
-                    '\$8.500',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/algodon.png',
-                    'Algodón Purufucado JGB',
-                    '25 gr - Tienda Doña Sol',
-                    '\$2.000',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/comida_cachorro.png',
-                    'Pedigree - Alimento humedo cachorro sabor res',
-                    '1 x 100 gr - Ahorra todo',
-                    '\$3.100',
-                  ),
-                  _productoTile(
-                    context,
-                    'assets/images/vino.jpg',
-                    'Vino Manischewitz',
-                    '750 ml - Tienda de bolsillo',
-                    '\$61.700',
-                  ),
-                ],
+                    producto.imagenUrl,
+                    producto.nombre,
+                    producto.descripcion,
+                    '\$${producto.precio}',
+                  );
+                },
               ),
             ),
-
             // Bottom nav
             Container(
               height: 60,
@@ -270,81 +223,16 @@ class InicioScreen extends StatelessWidget {
       ),
     );
   }
-Widget _navButton(BuildContext context,
+
+  Widget _navButton(BuildContext context,
       {required String iconPath, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       splashColor: Colors.transparent,
-      highlightColor: const Color.fromARGB(59, 9, 2, 2), // Color oscuro al presionar
+      highlightColor: const Color.fromARGB(59, 9, 2, 2),
       child: Container(
         padding: const EdgeInsets.all(10),
         child: Image.asset(iconPath, width: 30, height: 30),
-      ),
-    );
-  }
-
-  Widget _productoTile(
-    BuildContext context,
-    String image,
-    String title,
-    String description,
-    String price,
-  ) {
-    final cart = Provider.of<ShoppingCart>(context, listen: false);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDED7D7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Image.asset(image, width: 80, height: 80),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(description, style: const TextStyle(fontSize: 14)),
-                Text(
-                  price,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
-            onPressed: () {
-              cart.addItem(
-                Producto(
-                  imagen: image,
-                  titulo: title,
-                  descripcion: description,
-                  precio: price,
-                ),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('$title añadido al carrito'),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }

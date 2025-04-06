@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userRole == 'proveedor') {
         Navigator.pushReplacementNamed(context, '/provider_home'); // Pantalla del proveedor
       } else {
-        Navigator.pushReplacementNamed(context, '/client_home'); // Pantalla del cliente
+        Navigator.pushReplacementNamed(context, '/inicio'); // Pantalla del cliente
       }
     }
   } on FirebaseAuthException catch (e) {
