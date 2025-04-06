@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marketcheap/util/auth.dart';
-import 'InicioScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,17 +15,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final authService = Auth();
   String? _errorMessage;
-  void _handleEmailLogin() async {
+
+ Future<void> _handleEmailLogin() async {
   final email = emailController.text.trim();
   final password = passwordController.text.trim();
   String mensaje;
   try {
-    final userCredential = await authService.signInWithEmail(email, password);
-    if (userCredential != null) {
-      Navigator.pushReplacementNamed(context, '/inicio');
+    // Obtener el userCredential correctamente
+    UserCredential userCredential = (await authService.signInWithEmail(email, password)) as UserCredential;
+    
+    // Verificar si el usuario fue autenticado correctamente
+    if (userCredential != null && userCredential.user != null) {
+      // Obtener el rol del usuario desde Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).get();
+      String userRole = userDoc['rol'];
+
+      // Redirigir según el rol
+      if (userRole == 'proveedor') {
+        Navigator.pushReplacementNamed(context, '/provider_home'); // Pantalla del proveedor
+      } else {
+        Navigator.pushReplacementNamed(context, '/client_home'); // Pantalla del cliente
+      }
     }
   } on FirebaseAuthException catch (e) {
-    
     switch (e.code) {
       case 'user-not-found':
         mensaje = 'Usuario no encontrado. Verifica el correo.';
@@ -59,10 +71,20 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 
+
   void _handleSocialLogin(BuildContext context, Future Function() loginMethod) async {
     final userCredential = await loginMethod();
     if (userCredential != null) {
-      Navigator.pushReplacementNamed(context, '/inicio');
+      // Obtener el rol del usuario desde Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('usuarios').doc(userCredential.user!.uid).get();
+      String userRole = userDoc['rol'];
+
+      // Redirigir según el rol
+      if (userRole == 'proveedor') {
+        Navigator.pushReplacementNamed(context, '/provider_home'); // Pantalla del proveedor
+      } else {
+        Navigator.pushReplacementNamed(context, '/client_home'); // Pantalla del cliente
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error al iniciar sesión")),
@@ -149,17 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 10),
-
-              // Login con Facebook
-              SizedBox(
-                width: double.infinity,
-                height: 45,
-                child: OutlinedButton.icon(
-                  icon: Image.asset('assets/icons/facebook.png', height: 24),
-                  label: const Text("Iniciar sesión con Facebook"),
-                  onPressed: () => _handleSocialLogin(context, authService.signInWithFacebook),
-                ),
-              ),
 
               const SizedBox(height: 20),
               GestureDetector(

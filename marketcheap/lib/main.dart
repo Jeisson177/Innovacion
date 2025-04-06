@@ -5,12 +5,12 @@ import 'package:marketcheap/Screens/Consumidor/CartScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
-import 'package:marketcheap/Screens/Consumidor/RegisterScreen.dart';
+import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:marketcheap/util/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'LoginScreen.dart';
-import 'InicioScreen.dart';
+import 'Screens/Consumidor/InicioScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
