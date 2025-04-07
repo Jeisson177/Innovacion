@@ -1,8 +1,9 @@
 
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/entities/Producto.dart';
-import 'package:marketcheap/entities/producto.dart';
 import 'package:marketcheap/services/ProductoService.dart';  // Asegúrate de tener la clase Producto
 
 class InicioProveedor extends StatefulWidget {
@@ -24,15 +25,29 @@ class _InicioProveedorState extends State<InicioProveedor> {
 
   // Cargar los productos del proveedor
   Future<void> _loadProductos() async {
-    try {
-      List<Producto> productos = await _productoService.getProductos();
-      setState(() {
-        _productos = productos;
-      });
-    } catch (e) {
-      print("Error al cargar productos: $e");
+  try {
+    // Obtener el UID del proveedor autenticado
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      print("No hay proveedor autenticado.");
+      return;
     }
+
+    // Obtener nombre de la tienda desde Firestore
+    final doc = await FirebaseFirestore.instance.collection('proveedores').doc(uid).get();
+    final nombreTienda = doc['storeName'];
+
+    // Obtener productos que pertenezcan a esa tienda
+    List<Producto> productos = await _productoService.getProductos(tienda: nombreTienda);
+
+    setState(() {
+      _productos = productos;
+    });
+  } catch (e) {
+    print("Error al cargar productos: $e");
   }
+}
 
   // Pantalla de agregar producto
   void _navigateToAgregarProducto() {

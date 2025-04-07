@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:marketcheap/services/ProductoService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../entities/Producto.dart';
-
 
 class AgregarProductoScreen extends StatefulWidget {
   const AgregarProductoScreen({super.key});
@@ -34,23 +35,35 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
       return;
     }
 
-    Producto producto = Producto(
-      id: DateTime.now().toString(), // ID único para el producto
-      nombre: nombre,
-      marca: marca,
-      tienda: 'NombreTienda',  // Este valor debería ser el nombre del proveedor
-      precio: precio,
-      descripcion: descripcion,
-      categoria: categoria,
-      cantidadDisponible: 100,  // Puedes ajustar la cantidad disponible según lo que necesites
-      imagenUrl: imagenUrl,
-      valoraciones: [],
-    );
-
     try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        throw Exception('Usuario no autenticado');
+      }
+
+      final doc = await FirebaseFirestore.instance.collection('proveedores').doc(uid).get();
+      final storeName = doc['storeName'] ?? '';
+
+      if (storeName.isEmpty) {
+        throw Exception('El proveedor no tiene un nombre de tienda asignado');
+      }
+
+      Producto producto = Producto(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        nombre: nombre,
+        marca: marca,
+        tienda: storeName,
+        precio: precio,
+        descripcion: descripcion,
+        categoria: categoria,
+        cantidadDisponible: 100,
+        imagenUrl: imagenUrl,
+        valoraciones: [],
+      );
+
       await _productoService.saveProducto(producto);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto agregado')));
-      Navigator.pop(context); // Volver a la pantalla anterior
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al guardar producto: $e')));
     }

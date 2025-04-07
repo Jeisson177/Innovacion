@@ -11,6 +11,10 @@ import 'package:marketcheap/util/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'LoginScreen.dart';
 import 'Screens/Consumidor/InicioScreen.dart';
+import 'Screens/Proveedor/InicioProvedor.dart';
+import 'Screens/Proveedor/AgregarProductoScreen.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +67,8 @@ class MyApp extends StatelessWidget {
           '/registro': (context) => const RegisterScreen(),
           '/mapa': (context) => const MapScreen(),
           '/perfil': (context) => const ProfileScreen(),
+          '/provider_home': (context) => const InicioProveedor(),
+          '/agregar_producto': (context) => const AgregarProductoScreen(),
         },
       ),
     );

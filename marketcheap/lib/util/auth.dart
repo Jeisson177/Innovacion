@@ -29,17 +29,11 @@ class Auth {
   }
 
   // Inicio de sesión con email y contraseña
-  Future<String?> signInWithEmail(String email, String password) async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user?.uid;
-    } catch (e) {
-      print('Error al iniciar sesión: $e');
-      return null;
-    }
+  Future<UserCredential> signInWithEmail(String email, String password) async {
+    return await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   // Inicio de sesión con Google

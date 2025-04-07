@@ -50,29 +50,39 @@ class ProductoService {
     return null;
   }
 
-  Future<List<Producto>> getProductos() async {
-    try {
-      QuerySnapshot querySnapshot = await _db.collection('productos').get();
-      return querySnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        return Producto(
-          id: doc.id,
-          nombre: data['nombre'],
-          marca: data['marca'],
-          tienda: data['tienda'],
-          precio: data['precio'],
-          descripcion: data['descripcion'],
-          categoria: data['categoria'],
-          cantidadDisponible: data['cantidadDisponible'],
-          imagenUrl: data['imagenUrl'],
-          valoraciones: List<double>.from(data['valoraciones']),
-        );
-      }).toList();
-    } catch (e) {
-      print("Error al obtener productos: $e");
-      return [];
+  Future<List<Producto>> getProductos({String? tienda}) async {
+  try {
+    Query query = _db.collection('productos');
+    
+    if (tienda != null) {
+      query = query.where('tienda', isEqualTo: tienda);
     }
+
+    QuerySnapshot querySnapshot = await query.get();
+
+    return querySnapshot.docs.map((doc) {
+      var data = doc.data() as Map<String, dynamic>;
+      return Producto(
+        id: doc.id,
+        nombre: data['nombre'],
+        marca: data['marca'],
+        tienda: data['tienda'],
+        precio: data['precio'],
+        descripcion: data['descripcion'],
+        categoria: data['categoria'],
+        cantidadDisponible: data['cantidadDisponible'],
+        imagenUrl: data['imagenUrl'],
+        valoraciones: List<double>.from(data['valoraciones'] ?? []),
+      );
+    }).toList();
+  } catch (e) {
+    print("Error al obtener productos: $e");
+    return [];
   }
+}
+
+
+
 
   Future<void> updateProducto(Producto producto) async {
     try {
