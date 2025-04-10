@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:marketcheap/InicioScreen.dart'; 
-import 'package:marketcheap/MapScreen.dart'; 
+import 'package:marketcheap/Screens/Consumidor/InicioScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/MapScreen.dart'; 
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

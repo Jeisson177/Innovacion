@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:marketcheap/ShoppinfCart.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:provider/provider.dart';
 
 class CartScreen extends StatelessWidget {

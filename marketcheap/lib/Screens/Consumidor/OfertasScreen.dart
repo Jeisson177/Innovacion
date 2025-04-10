@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:marketcheap/ProductList.dart';
-import 'package:marketcheap/ShoppinfCart.dart';
+import 'package:marketcheap/Screens/Consumidor/ProductList.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 
 class OfertasScreen extends StatelessWidget {
   final List<Producto> ofertas = [
     Producto(
-      imagen: 'assets/images/oferta1.jpg',
-      titulo: 'Detergente 3x2',
+      imagen: 'assets/images/papel.jpg',
+      titulo: 'Papel higienico 3x2, 4 rollos c/u',
       descripcion: 'Oferta válida hasta agotar stock - Tienda LimpiaPlus',
-      precio: '\$22.999',
+      precio: '\$17.000',
     ),
     Producto(
-      imagen: 'assets/images/oferta2.jpg',
-      titulo: 'Arroz Roa x5kg',
+      imagen: 'assets/images/arroz.jpg',
+      titulo: 'Arroz Diana x5.000g',
       descripcion: 'Precio especial hoy - SuperAhorro',
-      precio: '\$17.800',
+      precio: '\$4.000',
     ),
   ];
 
