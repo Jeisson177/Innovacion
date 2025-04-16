@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:marketcheap/services/ProductoService.dart';
 
 import '../../entities/Producto.dart';
@@ -31,10 +32,7 @@ class _InicioScreenState extends State<InicioScreen> {
   // Crear el tile de producto (para el ListView)
   Widget _productoTile(
     BuildContext context,
-    String image,
-    String title,
-    String description,
-    String price,
+    Producto producto,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -45,22 +43,22 @@ class _InicioScreenState extends State<InicioScreen> {
       ),
       child: Row(
         children: [
-          Image.network(image, width: 80, height: 80),  // Usar Image.network para cargar desde URL
+          Image.network(producto.imagenUrl, width: 80, height: 80),  // Usar Image.network para cargar desde URL
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  producto.nombre,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-                Text(description, style: const TextStyle(fontSize: 14)),
+                Text(producto.descripcion, style: const TextStyle(fontSize: 14)),
                 Text(
-                  price,
+                  '\$${producto.precio.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -69,6 +67,33 @@ class _InicioScreenState extends State<InicioScreen> {
               ],
             ),
           ),
+          IconButton(
+            icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
+            onPressed: () {
+              final cartItem = Producto(
+              id: producto.id,
+              nombre: producto.nombre,
+              marca: producto.marca,
+              tienda: producto.tienda,
+              precio: producto.precio,
+              descripcion: producto.descripcion,
+              categoria: producto.categoria,
+              cantidadDisponible: producto.cantidadDisponible,
+              imagenUrl: producto.imagenUrl,
+              valoraciones: producto.valoraciones,
+            );
+            ShoppingCart.of(context).addItem(cartItem);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${producto.nombre} agregado al carrito'),
+                duration: const Duration(seconds: 1),
+              ),
+            );
+
+            },
+          ),
+
+
         ],
       ),
     );
@@ -164,14 +189,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 padding: const EdgeInsets.all(10),
                 itemCount: _productos.length,
                 itemBuilder: (context, index) {
-                  Producto producto = _productos[index];
-                  return _productoTile(
-                    context,
-                    producto.imagenUrl,
-                    producto.nombre,
-                    producto.descripcion,
-                    '\$${producto.precio}',
-                  );
+                  return _productoTile(context, _productos[index]);
                 },
               ),
             ),

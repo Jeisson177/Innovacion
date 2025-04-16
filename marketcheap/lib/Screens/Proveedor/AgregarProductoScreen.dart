@@ -19,6 +19,7 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _categoriaController = TextEditingController();
   final TextEditingController _imagenUrlController = TextEditingController();
+final TextEditingController _cantidadController = TextEditingController();
 
   final ProductoService _productoService = ProductoService();
 
@@ -29,6 +30,7 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
     final descripcion = _descripcionController.text.trim();
     final categoria = _categoriaController.text.trim();
     final imagenUrl = _imagenUrlController.text.trim();
+    final cantidad = int.tryParse(_cantidadController.text.trim()) ?? 0; // Nueva línea
 
     if (nombre.isEmpty || marca.isEmpty || precio <= 0.0 || descripcion.isEmpty || categoria.isEmpty || imagenUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Todos los campos son obligatorios')));
@@ -56,14 +58,14 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
         precio: precio,
         descripcion: descripcion,
         categoria: categoria,
-        cantidadDisponible: 100,
+        cantidadDisponible: cantidad,
         imagenUrl: imagenUrl,
         valoraciones: [],
       );
 
       await _productoService.saveProducto(producto);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto agregado')));
-      Navigator.pop(context);
+      Navigator.pop(context,true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al guardar producto: $e')));
     }
@@ -85,6 +87,14 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
               TextField(
                 controller: _marcaController,
                 decoration: const InputDecoration(labelText: 'Marca del producto'),
+              ),
+              TextField(
+                controller: _cantidadController, 
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Cantidad en stock',
+                  hintText: 'Ingrese la cantidad disponible'
+                ),
               ),
               TextField(
                 controller: _precioController,
@@ -113,5 +123,16 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _marcaController.dispose();
+    _precioController.dispose();
+    _descripcionController.dispose();
+    _categoriaController.dispose();
+    _imagenUrlController.dispose();
+    _cantidadController.dispose(); // Nuevo
+    super.dispose();
   }
 }
