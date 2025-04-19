@@ -35,7 +35,7 @@ class _InicioScreenState extends State<InicioScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return null;
 
-    final doc = await FirebaseFirestore.instance.collection('usuarios').doc(uid).get();
+    final doc = await FirebaseFirestore.instance.collection('clientes').doc(uid).get();
     if (doc.exists) {
       return doc.data()?['address'] ?? 'Sin dirección registrada';
     } else {
