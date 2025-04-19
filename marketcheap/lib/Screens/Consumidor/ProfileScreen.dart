@@ -1,106 +1,172 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/Screens/Consumidor/InicioScreen.dart';
-import 'package:marketcheap/Screens/Consumidor/MapScreen.dart'; 
+import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
+import 'package:marketcheap/LoginScreen.dart'; // Asegúrate de importar tu pantalla de login
+import 'package:marketcheap/Screens/Consumidor/ConfiguracionScreen.dart'; // Asegúrate de importar tu pantalla de configuración
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String nombreCliente = "";
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatosCliente();
+  }
+
+  Future<void> _cargarDatosCliente() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        final doc = await FirebaseFirestore.instance.collection("clientes").doc(uid).get();
+        final data = doc.data();
+        if (data != null) {
+          setState(() {
+            nombreCliente = "${data['firstName']} ${data['lastName']}";
+            cargando = false;
+          });
+        } else {
+          setState(() {
+            cargando = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No se encontraron datos del cliente.')),
+          );
+        }
+      }
+    } catch (e) {
+      print("Error al obtener los datos del cliente: $e");
+      setState(() {
+        cargando = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al obtener los datos del cliente.')),
+      );
+    }
+  }
 
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
-      case 0: // Inicio
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const InicioScreen()),
-        );
+      case 0:
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const InicioScreen()));
         break;
-      case 1: // Mapa
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MapScreen()),
-        );
+      case 1:
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MapScreen()));
         break;
     }
+  }
+
+  void _logOut() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Sección de perfil con gradiente
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 98, 195, 107),
-                  Color.fromARGB(255, 40, 132, 44),
-                ],
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-            ),
-            child: Column(
-              children: const [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.black,
-                  child: Icon(Icons.person, size: 50, color: Colors.white),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Efraín Ortiz Pabón",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                Text(
-                  "Hola",
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Sección de servicios
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Mis servicios",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Botones de servicios
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 3,
-              padding: const EdgeInsets.all(20),
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
+      body: cargando
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildServiceButton(Icons.settings, "Configuración"),
-                _buildServiceButton(Icons.star, "Favoritos"),
-                _buildServiceButton(Icons.location_on, "Ubicación"),
-                _buildServiceButton(Icons.history, "Historial"),
-                _buildServiceButton(Icons.notifications, "Notificaciones"),
-                _buildServiceButton(Icons.shopping_cart, "Mis pedidos"),
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 98, 195, 107),
+                        Color.fromARGB(255, 40, 132, 44),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.black,
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        nombreCliente,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Text(
+                        "Bienvenido !",
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Mis servicios",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 1,
+                      children: [
+                        _buildServiceButton(Icons.settings, "Configuración", onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ConfiguracionScreen()),
+                          );
+                        }),
+                        _buildServiceButton(Icons.star, "Favoritos", onTap: () {}),
+                        _buildServiceButton(Icons.history, "Historial", onTap: () {}),
+                        _buildServiceButton(Icons.notifications, "Notificaciones", onTap: () {}),
+                        _buildServiceButton(Icons.logout, "LogOut", isLogout: true, onTap: _logOut),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
-
-      // Barra de navegación inferior con gradiente usando Stack
       bottomNavigationBar: Stack(
         children: [
           Container(
@@ -146,26 +212,36 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Widget para los botones de servicios
-  static Widget _buildServiceButton(IconData icon, String text) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 98, 195, 107),
-                Color.fromARGB(255, 40, 132, 44),
-              ],
+  static Widget _buildServiceButton(IconData icon, String text, {VoidCallback? onTap, bool isLogout = false, double iconSize = 30}) {
+    return GestureDetector(
+      onTap: onTap ?? () {},
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              gradient: isLogout
+                  ? const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 220, 50, 50), // Rojo para LogOut
+                        Color.fromARGB(255, 186, 36, 36),
+                      ],
+                    )
+                  : const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 98, 195, 107),
+                        Color.fromARGB(255, 40, 132, 44),
+                      ],
+                    ),
+              shape: BoxShape.circle,
             ),
-            shape: BoxShape.circle,
+            child: Icon(icon, size: iconSize, color: Colors.white),
           ),
-          child: Icon(icon, size: 30, color: Colors.white),
-        ),
-        const SizedBox(height: 5),
-        Text(text, style: const TextStyle(fontSize: 12)),
-      ],
+          const SizedBox(height: 5),
+          Text(text, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 }
