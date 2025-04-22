@@ -13,6 +13,8 @@ import 'LoginScreen.dart';
 import 'Screens/Consumidor/InicioScreen.dart';
 import 'Screens/Proveedor/InicioProvedor.dart';
 import 'Screens/Proveedor/AgregarProductoScreen.dart';
+import 'Screens/Consumidor/ConfiguracionScreen.dart';
+import 'Screens/Proveedor/EditarProductoScreen.dart';
 
 
 
@@ -69,6 +71,10 @@ class MyApp extends StatelessWidget {
           '/perfil': (context) => const ProfileScreen(),
           '/provider_home': (context) => const InicioProveedor(),
           '/agregar_producto': (context) => const AgregarProductoScreen(),
+          '/editar_producto': (context) => const EditarProductoScreen(),
+          '/configurar_perfil': (context) => const ConfiguracionScreen(),
+           
+
         },
       ),
     );

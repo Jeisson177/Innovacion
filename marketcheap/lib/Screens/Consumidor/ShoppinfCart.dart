@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:marketcheap/entities/Producto.dart';
 import 'package:provider/provider.dart';
 
-class Producto {
-  final String imagen;
-  final String titulo;
-  final String descripcion;
-  final String precio;
 
-  Producto({
-    required this.imagen,
-    required this.titulo,
-    required this.descripcion,
-    required this.precio,
-  });
-}
 
 class CartItem {
   final Producto producto;
@@ -26,9 +15,12 @@ class ShoppingCart extends ChangeNotifier {
   final List<CartItem> _items = [];
 
   List<CartItem> get items => _items;
-
+  void clearCart() {
+    _items.clear();
+    notifyListeners();
+  }
   void addItem(Producto producto) {
-    final existingIndex = _items.indexWhere((item) => item.producto.titulo == producto.titulo);
+    final existingIndex = _items.indexWhere((item) => item.producto.nombre == producto.nombre);
     
     if (existingIndex >= 0) {
       _items[existingIndex].cantidad++;
@@ -39,12 +31,12 @@ class ShoppingCart extends ChangeNotifier {
   }
 
   void removeItem(String productId) {
-    _items.removeWhere((item) => item.producto.titulo == productId);
+    _items.removeWhere((item) => item.producto.id == productId);
     notifyListeners();
   }
 
   void updateQuantity(String productId, int newQuantity) {
-    final index = _items.indexWhere((item) => item.producto.titulo == productId);
+    final index = _items.indexWhere((item) => item.producto.id == productId);
     if (index >= 0) {
       _items[index].cantidad = newQuantity;
       notifyListeners();
@@ -53,7 +45,7 @@ class ShoppingCart extends ChangeNotifier {
 
   double get total {
     return _items.fold(0, (sum, item) {
-      final price = double.parse(item.producto.precio.replaceAll(RegExp(r'[^0-9.]'), ''));
+      final price = item.producto.precio;
       return sum + (price * item.cantidad);
     });
   }
@@ -61,4 +53,10 @@ class ShoppingCart extends ChangeNotifier {
   static ShoppingCart of(BuildContext context) {
     return Provider.of<ShoppingCart>(context, listen: false);
   }
+
+  int get itemCount {
+    return _items.fold(0, (sum, item) => sum + item.cantidad);
+  }
+
+  
 }

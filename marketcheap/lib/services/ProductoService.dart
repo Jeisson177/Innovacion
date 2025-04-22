@@ -64,15 +64,15 @@ class ProductoService {
       var data = doc.data() as Map<String, dynamic>;
       return Producto(
         id: doc.id,
-        nombre: data['nombre'],
-        marca: data['marca'],
-        tienda: data['tienda'],
-        precio: data['precio'],
-        descripcion: data['descripcion'],
-        categoria: data['categoria'],
-        cantidadDisponible: data['cantidadDisponible'],
-        imagenUrl: data['imagenUrl'],
-        valoraciones: List<double>.from(data['valoraciones'] ?? []),
+        nombre: data['nombre'] ?? '',
+        marca: data['marca'] ?? '',
+        tienda: data['tienda'] ?? '',
+        precio: (data['precio'] as num).toDouble(), // Conversión segura
+        descripcion: data['descripcion'] ?? '',
+        categoria: data['categoria'] ?? '',
+        cantidadDisponible: data['cantidadDisponible'] ?? 0,
+        imagenUrl: data['imagenUrl'] ?? '',
+        valoraciones: List<double>.from(data['valoraciones']?.map((v) => v.toDouble()) ?? []),
       );
     }).toList();
   } catch (e) {
@@ -80,7 +80,6 @@ class ProductoService {
     return [];
   }
 }
-
 
 
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:marketcheap/services/ProductoService.dart';
-
 import '../../entities/Producto.dart';
 
 class InicioScreen extends StatefulWidget {
@@ -28,14 +30,21 @@ class _InicioScreenState extends State<InicioScreen> {
     });
   }
 
-  // Crear el tile de producto (para el ListView)
-  Widget _productoTile(
-    BuildContext context,
-    String image,
-    String title,
-    String description,
-    String price,
-  ) {
+  // Obtener la dirección del usuario desde Firestore
+  Future<String?> _obtenerDireccion() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
+
+    final doc = await FirebaseFirestore.instance.collection('clientes').doc(uid).get();
+    if (doc.exists) {
+      return doc.data()?['address'] ?? 'Sin dirección registrada';
+    } else {
+      return 'Sin dirección registrada';
+    }
+  }
+
+  // Crear el tile de producto
+  Widget _productoTile(BuildContext context, Producto producto) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(10),
@@ -45,29 +54,47 @@ class _InicioScreenState extends State<InicioScreen> {
       ),
       child: Row(
         children: [
-          Image.network(image, width: 80, height: 80),  // Usar Image.network para cargar desde URL
+          Image.network(producto.imagenUrl, width: 80, height: 80),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  producto.nombre,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(description, style: const TextStyle(fontSize: 14)),
+                Text(producto.descripcion, style: const TextStyle(fontSize: 14)),
                 Text(
-                  price,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  '\$${producto.precio.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ],
             ),
+          ),
+          IconButton(
+            icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
+            onPressed: () {
+              final cartItem = Producto(
+                id: producto.id,
+                nombre: producto.nombre,
+                marca: producto.marca,
+                tienda: producto.tienda,
+                precio: producto.precio,
+                descripcion: producto.descripcion,
+                categoria: producto.categoria,
+                cantidadDisponible: producto.cantidadDisponible,
+                imagenUrl: producto.imagenUrl,
+                valoraciones: producto.valoraciones,
+              );
+              ShoppingCart.of(context).addItem(cartItem);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${producto.nombre} agregado al carrito'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -80,7 +107,7 @@ class _InicioScreenState extends State<InicioScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar
+            // Top bar con dirección dinámica
             Container(
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
@@ -95,9 +122,26 @@ class _InicioScreenState extends State<InicioScreen> {
                 children: [
                   const Icon(Icons.location_on, color: Colors.white),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Cra. 7 #40 - 62',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  FutureBuilder<String?>(
+                    future: _obtenerDireccion(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text(
+                          'Cargando...',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        );
+                      } else if (snapshot.hasError) {
+                        return const Text(
+                          'Error',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        );
+                      } else {
+                        return Text(
+                          snapshot.data ?? 'Sin dirección registrada',
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        );
+                      }
+                    },
                   ),
                   const Spacer(),
                   IconButton(
@@ -113,6 +157,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 ],
               ),
             ),
+
             // Search bar
             Container(
               margin: const EdgeInsets.all(10),
@@ -128,6 +173,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 ),
               ),
             ),
+
             // Promo banner
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -143,11 +189,7 @@ class _InicioScreenState extends State<InicioScreen> {
               ),
               child: Row(
                 children: [
-                  Image.asset(
-                    'assets/icons/ic_megaphone.png',
-                    width: 50,
-                    height: 50,
-                  ),
+                  Image.asset('assets/icons/ic_megaphone.png', width: 50, height: 50),
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
@@ -158,23 +200,18 @@ class _InicioScreenState extends State<InicioScreen> {
                 ],
               ),
             ),
-            // Productos scrollables
+
+            // Lista de productos
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(10),
                 itemCount: _productos.length,
                 itemBuilder: (context, index) {
-                  Producto producto = _productos[index];
-                  return _productoTile(
-                    context,
-                    producto.imagenUrl,
-                    producto.nombre,
-                    producto.descripcion,
-                    '\$${producto.precio}',
-                  );
+                  return _productoTile(context, _productos[index]);
                 },
               ),
             ),
+
             // Bottom nav
             Container(
               height: 60,
@@ -224,8 +261,7 @@ class _InicioScreenState extends State<InicioScreen> {
     );
   }
 
-  Widget _navButton(BuildContext context,
-      {required String iconPath, required VoidCallback onTap}) {
+  Widget _navButton(BuildContext context, {required String iconPath, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       splashColor: Colors.transparent,

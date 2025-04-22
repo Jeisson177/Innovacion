@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
+import 'package:marketcheap/entities/Producto.dart';
 import 'package:provider/provider.dart';
 
 class ProductList extends StatelessWidget {
@@ -45,17 +46,17 @@ class _ItemProducto extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset(producto.imagen, width: 80, height: 80),
+          Image.asset(producto.imagenUrl, width: 80, height: 80),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(producto.titulo, 
+                Text(producto.nombre, 
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 Text(producto.descripcion, 
                     style: const TextStyle(fontSize: 14)),
-                Text(producto.precio, 
+                Text('producto.precio', 
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ],
             ),
