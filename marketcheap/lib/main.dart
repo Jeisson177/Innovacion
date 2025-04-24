@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
           '/perfil': (context) => const ProfileScreen(),
           '/provider_home': (context) => const InicioProveedor(),
           '/agregar_producto': (context) => const AgregarProductoScreen(),
-          '/editar_producto': (context) => const EditarProductoScreen(),
+        
           '/configurar_perfil': (context) => const ConfiguracionScreen(),
            
 

@@ -20,6 +20,7 @@ dependencies:
   form_builder_validators: ^11.1.2
   geolocator: ^10.1.0 # O la última versión disponible
   google_maps_flutter: ^2.5.0
+  google_place: ^0.4.6 # Plugin para usar Places API
   flutter_polyline_points: ^1.0.0
   google_maps_flutter_web: ^0.5.12
   firebase_storage: ^12.4.5
