@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "232448418503",
-    "project_id": "marketcheap-fa9ff",
-    "storage_bucket": "marketcheap-fa9ff.firebasestorage.app"
+    "project_number": "797435647849",
+    "project_id": "marketcheap-fe3be",
+    "storage_bucket": "marketcheap-fe3be.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:232448418503:android:36f08cea9b107b47bc94e2",
+        "mobilesdk_app_id": "1:797435647849:android:8c539edb3c12ee49580ff8",
         "android_client_info": {
           "package_name": "com.example.marketcheap"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBXu5axKMkaG4w8ycCKtXWdZg_VzV0-DVg"
+          "current_key": "AIzaSyAiR43AauAHSuvy2T6Ut6MZX8cZFRZgAMg"
         }
       ],
       "services": {
