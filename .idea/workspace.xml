@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c1c3a24f-9f4d-4415-81d6-8d9fb3b067fd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/marketcheap/lib/Screens/Consumidor/ProductosCercanos.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/marketcheap/lib/services/GeocodingService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Innovacion.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Innovacion.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketcheap/lib/services/ProductoService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/marketcheap/lib/services/ProductoService.dart" afterDir="false" />
-    </list>
+    <list default="true" id="c1c3a24f-9f4d-4415-81d6-8d9fb3b067fd" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
