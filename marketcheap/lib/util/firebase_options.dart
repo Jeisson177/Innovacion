@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '232448418503',
     projectId: 'marketcheap-fa9ff',
     authDomain: 'marketcheap-fa9ff.firebaseapp.com',
-    storageBucket: 'marketcheap-fa9ff.firebasestorage.app',
+    storageBucket: 'marketcheap-fa9ff.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(

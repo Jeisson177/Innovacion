@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,68 +16,100 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController(); // Nombre
-  final TextEditingController _lastNameController = TextEditingController(); // Apellido
-  final TextEditingController _addressController = TextEditingController(); // Dirección (opcional)
-  final TextEditingController _phoneController = TextEditingController(); // Teléfono
-  final TextEditingController _storeNameController = TextEditingController(); // Nombre de la tienda (proveedor)
-  final TextEditingController _storeDescriptionController = TextEditingController(); // Descripción de la tienda (proveedor)
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _storeNameController = TextEditingController();
+  final TextEditingController _storeDescriptionController = TextEditingController();
+  LatLng? _selectedLatLng;
+  String _direccion = "Seleccionando dirección...";
+  late GoogleMapController _mapController;
+  String _selectedRole = 'cliente';
 
-  String _selectedRole = 'cliente'; // Valor por defecto es 'cliente'
+  @override
+  void initState() {
+    super.initState();
+    _obtenerUbicacionYDireccionInicial();
+  }
+
+  Future<void> _obtenerUbicacionYDireccionInicial() async {
+    Position pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _selectedLatLng = LatLng(pos.latitude, pos.longitude);
+    });
+    _actualizarDireccionDesdeCoord(_selectedLatLng!);
+  }
+
+  Future<void> _actualizarDireccionDesdeCoord(LatLng coords) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(coords.latitude, coords.longitude);
+    Placemark p = placemarks.first;
+    setState(() {
+      _direccion = '${p.street}, ${p.locality}, ${p.country}';
+    });
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
   Future<void> _register() async {
     try {
-      // Crear usuario con Firebase Auth
+      if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+        _showError('Correo electrónico inválido');
+        return;
+      }
+      if (_passwordController.text.length < 6) {
+        _showError('La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+      if (_selectedRole == 'cliente' && (_firstNameController.text.isEmpty || _lastNameController.text.isEmpty)) {
+        _showError('Nombre y apellido son requeridos para cliente');
+        return;
+      }
+
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      
+
       User? user = userCredential.user;
 
       if (user != null) {
-        // Guardar el rol del usuario en Firestore
         await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set({
-          'rol': _selectedRole, // Guardamos el rol seleccionado
+          'rol': _selectedRole,
         });
 
-        // Guardar los datos adicionales dependiendo del rol
         if (_selectedRole == 'proveedor') {
-          // Guardar los datos del proveedor
           await FirebaseFirestore.instance.collection('proveedores').doc(user.uid).set({
             'storeName': _storeNameController.text,
             'email': _emailController.text.trim(),
             'phone': _phoneController.text.trim(),
-            'address': _addressController.text.trim(),
+            'address': _direccion,
+            'ubicacion': {
+              'lat': _selectedLatLng?.latitude,
+              'lng': _selectedLatLng?.longitude,
+            },
             'storeDescription': _storeDescriptionController.text,
           });
         } else {
-          // Guardar los datos del cliente
           await FirebaseFirestore.instance.collection('clientes').doc(user.uid).set({
             'firstName': _firstNameController.text,
             'lastName': _lastNameController.text,
-            'address': _addressController.text.trim(),
+            'address': _direccion,
+            'ubicacion': {
+              'lat': _selectedLatLng?.latitude,
+              'lng': _selectedLatLng?.longitude,
+            },
             'phone': _phoneController.text.trim(),
           });
         }
 
-        // Registro exitoso, redirigir según el rol
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registro exitoso')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
 
-        if (_selectedRole == 'proveedor') {
-          // Redirigir a la pantalla de proveedores
-          Navigator.pushReplacementNamed(context, '/provider_home'); // Cambiar a tu ruta
-        } else {
-          // Redirigir a la pantalla de clientes
-          Navigator.pushReplacementNamed(context, '/client_home'); // Cambiar a tu ruta
-        }
+        Navigator.pushReplacementNamed(context, _selectedRole == 'proveedor' ? '/provider_home' : '/client_home');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar: $e')),
-      );
+      _showError('Error al registrar: $e');
     }
   }
 
@@ -96,100 +132,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 30),
                 Image.asset('assets/icons/ic_marketcheap_logo.png', height: 100),
                 const SizedBox(height: 10),
-                const Text(
-                  'Crear Cuenta',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                const Text('Crear Cuenta', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                    filled: true,
-                    fillColor: Colors.white70,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildTextField(_emailController, 'Correo electrónico', false),
                 const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Contraseña',
-                    filled: true,
-                    fillColor: Colors.white70,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildTextField(_passwordController, 'Contraseña', true),
                 const SizedBox(height: 20),
-                // Campos para cliente o proveedor
                 if (_selectedRole == 'cliente') ...[
-                  TextField(
-                    controller: _firstNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre',
-                      filled: true,
-                      fillColor: Colors.white70,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(_firstNameController, 'Nombre', false),
                   const SizedBox(height: 20),
-                  TextField(
-                    controller: _lastNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Apellido',
-                      filled: true,
-                      fillColor: Colors.white70,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-                if (_selectedRole == 'cliente') ...[
+                  _buildTextField(_lastNameController, 'Apellido', false),
                   const SizedBox(height: 20),
-                  TextField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      labelText: 'Dirección (opcional)',
-                      filled: true,
-                      fillColor: Colors.white70,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+  RawGestureDetector(
+  gestures: <Type, GestureRecognizerFactory>{
+    VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+      () => VerticalDragGestureRecognizer(),
+      (VerticalDragGestureRecognizer instance) {
+        instance.onUpdate = (_) {}; // Evita que el scroll lo capture
+      },
+    ),
+  },
+  child: SizedBox(
+    height: 300,
+    child: GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: _selectedLatLng ?? LatLng(4.7110, -74.0721),
+        zoom: 16,
+      ),
+      onMapCreated: (controller) => _mapController = controller,
+      markers: _selectedLatLng != null
+          ? {
+              Marker(
+                markerId: const MarkerId("ubicacion"),
+                position: _selectedLatLng!,
+                draggable: true,
+                onDragEnd: (nuevaPos) {
+                  setState(() => _selectedLatLng = nuevaPos);
+                  _actualizarDireccionDesdeCoord(nuevaPos);
+                },
+              )
+            }
+          : {},
+      myLocationButtonEnabled: true,
+      zoomControlsEnabled: false,
+      zoomGesturesEnabled: true,
+      scrollGesturesEnabled: true,
+      rotateGesturesEnabled: true,
+      tiltGesturesEnabled: true,
+    ),
+  ),
+),
+
+
+                  const SizedBox(height: 10),
+                  Text("Dirección: $_direccion", textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
                 const SizedBox(height: 20),
-                TextField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Teléfono',
-                    filled: true,
-                    fillColor: Colors.white70,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildTextField(_phoneController, 'Teléfono', false),
                 const SizedBox(height: 20),
                 if (_selectedRole == 'proveedor') ...[
-                  TextField(
-                    controller: _storeNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre de la tienda',
-                      filled: true,
-                      fillColor: Colors.white70,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(_storeNameController, 'Nombre de la tienda', false),
                   const SizedBox(height: 20),
-                  TextField(
-                    controller: _storeDescriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Descripción de la tienda',
-                      filled: true,
-                      fillColor: Colors.white70,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(_storeDescriptionController, 'Descripción de la tienda', false),
                 ],
                 const SizedBox(height: 20),
-                // Dropdown para seleccionar el rol
                 DropdownButton<String>(
                   value: _selectedRole,
                   icon: const Icon(Icons.arrow_drop_down),
@@ -199,36 +205,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     });
                   },
                   items: <String>['cliente', 'proveedor']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value.capitalize()),
-                    );
-                  }).toList(),
+                      .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value.capitalize())))
+                      .toList(),
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 60,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 60),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  child: const Text(
-                    'Registrarse',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: const Text('Registrarse', style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(height: 10),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
                   child: const Text('¿Ya tienes cuenta? Inicia sesión'),
                 ),
               ],
@@ -238,11 +230,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+
+  Widget _buildTextField(TextEditingController controller, String label, bool obscure) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white70,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
 }
 
-// Función para capitalizar la primera letra de los roles
 extension StringCasingExtension on String {
   String capitalize() {
-    return this.isEmpty ? this : '${this[0].toUpperCase()}${this.substring(1)}';
+    return isEmpty ? this : '${this[0].toUpperCase()}${substring(1)}';
   }
 }
