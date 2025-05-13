@@ -20,17 +20,22 @@ import 'Screens/Proveedor/EditarProductoScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
-  // Solicitar permisos de geolocalización antes de lanzar la app
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    print("Firebase ya inicializado o error: $e");
+  }
+
   await _initLocationPermissions();
 
   runApp(MyApp());
 }
+
 
 Future<void> _initLocationPermissions() async {
   bool serviceEnabled;
@@ -63,6 +68,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const LoginScreen(),
+          '/login': (context) => const LoginScreen(),
           '/inicio': (context) => const InicioScreen(),
           '/ofertas': (context) => OfertasScreen(),
           '/carrito': (context) => const CartScreen(),

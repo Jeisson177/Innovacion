@@ -409,10 +409,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_place
-      sha256: "71538407e63f194a5a10d4747c934d26bfc4328c5ee571ffe25ae70a917f2cdc"
+      sha256: "4ba3190585365ea2bb5cee889db52efd30359d272e0ff927e4a8bda435b1b5e8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.7"
+    version: "0.4.6"
   google_sign_in:
     dependency: "direct main"
     description:
