@@ -1,18 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="c1c3a24f-9f4d-4415-81d6-8d9fb3b067fd" name="Changes" comment="" />
+    <list default="true" id="c1c3a24f-9f4d-4415-81d6-8d9fb3b067fd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/marketcheap/lib/Screens/Consumidor/ProductosCercanos.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marketcheap/lib/services/GeocodingService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Innovacion.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Innovacion.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marketcheap/lib/services/ProductoService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/marketcheap/lib/services/ProductoService.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "maferodriguezo"
+  }
 }]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Jeisson177/Innovacion.git",
+    "accountId": "011f009e-e3e0-401d-9f25-30904116ff01"
+  }
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="2vAuiGT8jQX8C94iyEa3tPXTtep" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -21,7 +51,16 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main"
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "Mafe",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/tools/dart-sdk",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -34,5 +73,16 @@
       <updated>1743600326380</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
