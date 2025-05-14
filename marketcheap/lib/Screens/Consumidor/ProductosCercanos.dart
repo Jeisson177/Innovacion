@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
-import 'package:marketcheap/entities/Producto.dart';
 import 'package:provider/provider.dart';
+import 'package:marketcheap/entities/Producto.dart';
 import 'package:marketcheap/services/ProductoService.dart';
 
 class ProductosCercanos extends StatefulWidget {
@@ -14,16 +14,16 @@ class ProductosCercanos extends StatefulWidget {
 }
 
 class _ProductosCercanosState extends State<ProductosCercanos> {
-  late Future<List<ProductoService.ProductoConDistancia>> _productosCercanos;
+  late Future<List<ProductoConDistancia>> _productosCercanos;
   double _radioKm = 5.0;
 
   @override
   void initState() {
     super.initState();
-    _cargarProductosCercanos();
+    _cargarProductos();
   }
 
-  void _cargarProductosCercanos() {
+  void _cargarProductos() {
     setState(() {
       _productosCercanos = ProductoService()
           .getProductosCercanos(widget.direccionUsuario, radioKm: _radioKm);
@@ -34,7 +34,7 @@ class _ProductosCercanosState extends State<ProductosCercanos> {
   Widget build(BuildContext context) {
     final cart = ShoppingCart.of(context);
 
-    return FutureBuilder<List<ProductoService.ProductoConDistancia>>(
+    return FutureBuilder<List<ProductoConDistancia>>(
       future: _productosCercanos,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,7 +63,7 @@ class _ProductosCercanosState extends State<ProductosCercanos> {
                       label: "${_radioKm.round()} km",
                       onChanged: (value) {
                         setState(() => _radioKm = value);
-                        _cargarProductosCercanos();
+                        _cargarProductos();
                       },
                     ),
                   ),
@@ -76,7 +76,7 @@ class _ProductosCercanosState extends State<ProductosCercanos> {
                 padding: const EdgeInsets.all(10),
                 itemCount: productos.length,
                 itemBuilder: (context, index) {
-                  final producto = productos[index].producto;
+                  final item = productos[index];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(10),
@@ -86,20 +86,20 @@ class _ProductosCercanosState extends State<ProductosCercanos> {
                     ),
                     child: Row(
                       children: [
-                        Image.asset(producto.imagenUrl, width: 80, height: 80),
+                        Image.asset(item.producto.imagenUrl, width: 80, height: 80),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(producto.nombre,
+                              Text(item.producto.nombre,
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Text(producto.descripcion,
+                              Text(item.producto.descripcion,
                                   style: const TextStyle(fontSize: 14)),
-                              Text('\$${producto.precio.toStringAsFixed(2)}',
+                              Text('\$${item.producto.precio.toStringAsFixed(2)}',
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               Text(
-                                'A ${productos[index].distanciaKm.toStringAsFixed(1)} km',
+                                'A ${item.distanciaKm.toStringAsFixed(1)} km - ${item.nombreTienda}',
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -107,7 +107,7 @@ class _ProductosCercanosState extends State<ProductosCercanos> {
                         ),
                         IconButton(
                           icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
-                          onPressed: () => cart.addItem(producto),
+                          onPressed: () => cart.addItem(item.producto),
                         ),
                       ],
                     ),

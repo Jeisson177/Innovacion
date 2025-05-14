@@ -1,4 +1,4 @@
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Proveedor {
   String id;
@@ -8,7 +8,8 @@ class Proveedor {
   String telefono;
   String direccion;
   String descripcion;
-  List<String> productos; // Lista de IDs de productos que el proveedor ha subido
+  List<String> productos;
+  LatLng? ubicacion; // Nueva propiedad para coordenadas
 
   Proveedor({
     required this.id,
@@ -19,7 +20,6 @@ class Proveedor {
     required this.direccion,
     required this.descripcion,
     required this.productos,
+    this.ubicacion, // Añadido al constructor
   });
-
-  // Métodos para agregar productos, etc.
 }

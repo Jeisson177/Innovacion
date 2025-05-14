@@ -2,7 +2,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GeocodingService {
-  // Convierte una dirección textual a coordenadas (latitud, longitud)
+  // Convierte dirección textual a coordenadas
   static Future<LatLng?> addressToLatLng(String address) async {
     try {
       final locations = await locationFromAddress(address);
@@ -16,7 +16,7 @@ class GeocodingService {
     }
   }
 
-  // Convierte coordenadas a dirección textual
+  // Convierte coordenadas a dirección textual (opcional)
   static Future<String?> latLngToAddress(LatLng position) async {
     try {
       final places = await placemarkFromCoordinates(
