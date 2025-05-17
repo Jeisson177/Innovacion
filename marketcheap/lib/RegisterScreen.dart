@@ -21,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _storeNameController = TextEditingController();
   final TextEditingController _storeDescriptionController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   LatLng? _selectedLatLng;
   String _direccion = "Seleccionando dirección...";
   late GoogleMapController _mapController;
@@ -46,6 +47,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _direccion = '${p.street}, ${p.locality}, ${p.country}';
     });
+  }
+
+  Future<void> _searchAddress() async {
+    try {
+      List<Location> locations = await locationFromAddress(_searchController.text);
+      if (locations.isNotEmpty) {
+        Location loc = locations.first;
+        setState(() {
+          _selectedLatLng = LatLng(loc.latitude, loc.longitude);
+        });
+        _mapController.animateCamera(CameraUpdate.newLatLng(_selectedLatLng!));
+        _actualizarDireccionDesdeCoord(_selectedLatLng!);
+      } else {
+        _showError('Dirección no encontrada');
+      }
+    } catch (e) {
+      _showError('Error al buscar dirección: $e');
+    }
   }
 
   void _showError(String msg) {
@@ -106,11 +125,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
 
-        Navigator.pushReplacementNamed(context, _selectedRole == 'proveedor' ? '/provider_home' : '/client_home');
+        Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
       _showError('Error al registrar: $e');
     }
+  }
+
+  void _onMapTap(LatLng position) {
+    setState(() {
+      _selectedLatLng = position;
+    });
+    _actualizarDireccionDesdeCoord(position);
   }
 
   @override
@@ -133,68 +159,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Image.asset('assets/icons/ic_marketcheap_logo.png', height: 100),
                 const SizedBox(height: 10),
                 const Text('Crear Cuenta', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 30),
-                _buildTextField(_emailController, 'Correo electrónico', false),
-                const SizedBox(height: 20),
-                _buildTextField(_passwordController, 'Contraseña', true),
-                const SizedBox(height: 20),
-                if (_selectedRole == 'cliente') ...[
-                  _buildTextField(_firstNameController, 'Nombre', false),
-                  const SizedBox(height: 20),
-                  _buildTextField(_lastNameController, 'Apellido', false),
-                  const SizedBox(height: 20),
-  RawGestureDetector(
-  gestures: <Type, GestureRecognizerFactory>{
-    VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-      () => VerticalDragGestureRecognizer(),
-      (VerticalDragGestureRecognizer instance) {
-        instance.onUpdate = (_) {}; // Evita que el scroll lo capture
-      },
-    ),
-  },
-  child: SizedBox(
-    height: 300,
-    child: GoogleMap(
-      initialCameraPosition: CameraPosition(
-        target: _selectedLatLng ?? LatLng(4.7110, -74.0721),
-        zoom: 16,
-      ),
-      onMapCreated: (controller) => _mapController = controller,
-      markers: _selectedLatLng != null
-          ? {
-              Marker(
-                markerId: const MarkerId("ubicacion"),
-                position: _selectedLatLng!,
-                draggable: true,
-                onDragEnd: (nuevaPos) {
-                  setState(() => _selectedLatLng = nuevaPos);
-                  _actualizarDireccionDesdeCoord(nuevaPos);
-                },
-              )
-            }
-          : {},
-      myLocationButtonEnabled: true,
-      zoomControlsEnabled: false,
-      zoomGesturesEnabled: true,
-      scrollGesturesEnabled: true,
-      rotateGesturesEnabled: true,
-      tiltGesturesEnabled: true,
-    ),
-  ),
-),
-
-
-                  const SizedBox(height: 10),
-                  Text("Dirección: $_direccion", textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
-                ],
-                const SizedBox(height: 20),
-                _buildTextField(_phoneController, 'Teléfono', false),
-                const SizedBox(height: 20),
-                if (_selectedRole == 'proveedor') ...[
-                  _buildTextField(_storeNameController, 'Nombre de la tienda', false),
-                  const SizedBox(height: 20),
-                  _buildTextField(_storeDescriptionController, 'Descripción de la tienda', false),
-                ],
                 const SizedBox(height: 20),
                 DropdownButton<String>(
                   value: _selectedRole,
@@ -208,6 +172,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value.capitalize())))
                       .toList(),
                 ),
+                const SizedBox(height: 30),
+                _buildTextField(_emailController, 'Correo electrónico', false),
+                const SizedBox(height: 20),
+                _buildTextField(_passwordController, 'Contraseña', true),
+                const SizedBox(height: 20),
+                if (_selectedRole == 'cliente') ...[
+                  _buildTextField(_firstNameController, 'Nombre', false),
+                  const SizedBox(height: 20),
+                  _buildTextField(_lastNameController, 'Apellido', false),
+                  const SizedBox(height: 20),
+                  RawGestureDetector(
+                    gestures: <Type, GestureRecognizerFactory>{
+                      VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+                        () => VerticalDragGestureRecognizer(),
+                        (VerticalDragGestureRecognizer instance) {
+                          instance.onUpdate = (_) {};
+                        },
+                      ),
+                    },
+                    child: SizedBox(
+                      height: 300,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _selectedLatLng ?? LatLng(4.7110, -74.0721),
+                          zoom: 16,
+                        ),
+                        onMapCreated: (controller) => _mapController = controller,
+                        markers: _selectedLatLng != null
+                            ? {
+                                Marker(
+                                  markerId: const MarkerId("ubicacion"),
+                                  position: _selectedLatLng!,
+                                  draggable: true,
+                                  onDragEnd: (nuevaPos) {
+                                    setState(() => _selectedLatLng = nuevaPos);
+                                    _actualizarDireccionDesdeCoord(nuevaPos);
+                                  },
+                                )
+                              }
+                            : {},
+                        myLocationButtonEnabled: true,
+                        zoomControlsEnabled: false,
+                        zoomGesturesEnabled: true,
+                        scrollGesturesEnabled: true,
+                        rotateGesturesEnabled: true,
+                        tiltGesturesEnabled: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text("Dirección: $_direccion", textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+                const SizedBox(height: 20),
+                _buildTextField(_phoneController, 'Teléfono', false),
+                const SizedBox(height: 20),
+                if (_selectedRole == 'proveedor') ...[
+                  _buildTextField(_searchController, 'Buscar dirección', false),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _searchAddress,
+                    child: const Text('Buscar'),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 300,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: _selectedLatLng ?? LatLng(4.7110, -74.0721),
+                        zoom: 16,
+                      ),
+                      onMapCreated: (controller) => _mapController = controller,
+                      markers: _selectedLatLng != null
+                          ? {
+                              Marker(
+                                markerId: const MarkerId("ubicacion"),
+                                position: _selectedLatLng!,
+                                draggable: true,
+                                onDragEnd: (nuevaPos) {
+                                  setState(() => _selectedLatLng = nuevaPos);
+                                  _actualizarDireccionDesdeCoord(nuevaPos);
+                                },
+                              )
+                            }
+                          : {},
+                      onTap: _onMapTap,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: false,
+                      zoomGesturesEnabled: true,
+                      scrollGesturesEnabled: true,
+                      rotateGesturesEnabled: true,
+                      tiltGesturesEnabled: true,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text("Dirección: $_direccion", textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  _buildTextField(_storeNameController, 'Nombre de la tienda', false),
+                  const SizedBox(height: 20),
+                  _buildTextField(_storeDescriptionController, 'Descripción de la tienda', false),
+                ],
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: _register,
