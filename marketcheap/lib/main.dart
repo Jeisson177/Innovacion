@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // <-- Importa Geolocator
+import 'package:geolocator/geolocator.dart';
 import 'package:marketcheap/Screens/Consumidor/CartScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/DetalleTienda.dart';
 import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
@@ -17,8 +18,6 @@ import 'Screens/Proveedor/InicioProvedor.dart';
 import 'Screens/Proveedor/AgregarProductoScreen.dart';
 import 'Screens/Consumidor/ConfiguracionScreen.dart';
 import 'Screens/Proveedor/EditarProductoScreen.dart';
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +36,6 @@ void main() async {
 
   runApp(MyApp());
 }
-
 
 Future<void> _initLocationPermissions() async {
   bool serviceEnabled;
@@ -81,13 +79,12 @@ class MyApp extends StatelessWidget {
           '/agregar_producto': (context) => const AgregarProductoScreen(),
           '/configurar_proveedor': (context) => const ConfiguracionProveedor(),
           '/editar_proveedor': (context) => const EditarProveedor(),
-          
-          
-          
-        
+          '/detalle_tienda': (context) {
+            final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+            final storeName = arguments?['storeName']?.toString() ?? 'Tienda sin nombre';
+            return DetalleTienda(storeName: storeName);
+          },
           '/configurar_perfil': (context) => const ConfiguracionScreen(),
-           
-
         },
       ),
     );

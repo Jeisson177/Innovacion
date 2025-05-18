@@ -49,8 +49,12 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
         throw Exception('El proveedor no tiene un nombre de tienda asignado');
       }
 
+      // Generate a unique product ID
+      final productId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Create the product
       Producto producto = Producto(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: productId,
         nombre: nombre,
         marca: marca,
         tienda: storeName,
@@ -62,7 +66,14 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
         valoraciones: [],
       );
 
+      // Save the product to the productos collection
       await _productoService.saveProducto(producto);
+
+      // Update the proveedor document to include the new product ID in the productos list
+      await FirebaseFirestore.instance.collection('proveedores').doc(uid).update({
+        'productos': FieldValue.arrayUnion([productId]),
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto agregado')));
       Navigator.pop(context, true);
     } catch (e) {
@@ -74,8 +85,7 @@ class _AgregarProductoScreenState extends State<AgregarProductoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Producto',
-        style: TextStyle(color: Colors.white),),
+        title: const Text('Agregar Producto', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.green,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [

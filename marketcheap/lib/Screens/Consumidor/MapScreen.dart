@@ -38,9 +38,7 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-
   void _fetchProviderMarkers() {
-    // Escuchar cambios en la colección de proveedores
     FirebaseFirestore.instance.collection('proveedores').snapshots().listen((snapshot) {
       setState(() {
         // Filtrar marcadores que no sean de proveedores para preservarlos
@@ -52,12 +50,22 @@ class _MapScreenState extends State<MapScreen> {
           final lng = data['ubicacion']?['lng'] as double?;
           final storeName = data['storeName'] as String?;
           if (lat != null && lng != null && storeName != null) {
+            print('Creating marker for storeName: $storeName');
             _markers.add(Marker(
               markerId: MarkerId('proveedor_${doc.id}'),
               position: LatLng(lat, lng),
               infoWindow: InfoWindow(
                 title: storeName,
                 snippet: data['storeDescription'] ?? 'Sin descripción',
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/detalle_tienda',
+                    arguments: {
+                      'storeName': storeName,
+                    },
+                  );
+                },
               ),
               icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
             ));
