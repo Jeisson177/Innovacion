@@ -25,6 +25,8 @@ class Producto {
     required this.valoraciones,
   });
 
+  
+ 
   // Método para agregar una valoración
   void agregarValoracion(double valoracion) {
     valoraciones.add(valoracion);

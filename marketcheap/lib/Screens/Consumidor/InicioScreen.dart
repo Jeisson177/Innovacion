@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:marketcheap/services/ProductoService.dart';
 import '../../entities/Producto.dart';
+import 'package:provider/provider.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -41,64 +42,6 @@ class _InicioScreenState extends State<InicioScreen> {
     } else {
       return 'Sin dirección registrada';
     }
-  }
-
-  // Crear el tile de producto
-  Widget _productoTile(BuildContext context, Producto producto) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDED7D7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Image.network(producto.imagenUrl, width: 80, height: 80),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  producto.nombre,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Text(producto.descripcion, style: const TextStyle(fontSize: 14)),
-                Text(
-                  '\$${producto.precio.toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Image.asset('assets/icons/ic_add.png', width: 30, height: 30),
-            onPressed: () {
-              final cartItem = Producto(
-                id: producto.id,
-                nombre: producto.nombre,
-                marca: producto.marca,
-                tienda: producto.tienda,
-                precio: producto.precio,
-                descripcion: producto.descripcion,
-                categoria: producto.categoria,
-                cantidadDisponible: producto.cantidadDisponible,
-                imagenUrl: producto.imagenUrl,
-                valoraciones: producto.valoraciones,
-              );
-              ShoppingCart.of(context).addItem(cartItem);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${producto.nombre} agregado al carrito'),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -207,7 +150,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 padding: const EdgeInsets.all(10),
                 itemCount: _productos.length,
                 itemBuilder: (context, index) {
-                  return _productoTile(context, _productos[index]);
+                  return _ProductoTile(product: _productos[index]);
                 },
               ),
             ),
@@ -242,7 +185,7 @@ class _InicioScreenState extends State<InicioScreen> {
                     context,
                     iconPath: 'assets/icons/ic_favorites.png',
                     onTap: () {
-                      // Acción para ofertas
+                      Navigator.pushNamed(context, '/valoraciones');
                     },
                   ),
                   _navButton(
@@ -269,6 +212,123 @@ class _InicioScreenState extends State<InicioScreen> {
       child: Container(
         padding: const EdgeInsets.all(10),
         child: Image.asset(iconPath, width: 30, height: 30),
+      ),
+    );
+  }
+}
+
+class _ProductoTile extends StatefulWidget {
+  final Producto product;
+
+  const _ProductoTile({required this.product});
+
+  @override
+  __ProductoTileState createState() => __ProductoTileState();
+}
+
+class __ProductoTileState extends State<_ProductoTile> {
+  late int quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    quantity = 1; // Default quantity when adding
+  }
+
+  void _addToCart() {
+    final cart = Provider.of<ShoppingCart>(context, listen: false);
+    for (int i = 0; i < quantity; i++) {
+      cart.addItem(widget.product);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$quantity x ${widget.product.nombre} agregado${quantity > 1 ? 's' : ''} al carrito'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                widget.product.imagenUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.image, size: 60),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.product.nombre,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Precio: \$${widget.product.precio.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Valoración: ${widget.product.obtenerValoracionPromedio().toStringAsFixed(1)}/5',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline),
+                  color: Colors.red,
+                  onPressed: quantity > 1
+                      ? () {
+                          setState(() {
+                            quantity--;
+                          });
+                        }
+                      : null,
+                ),
+                Text(
+                  quantity.toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline),
+                  color: Colors.green,
+                  onPressed: () {
+                    setState(() {
+                      quantity++;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add_shopping_cart, color: Colors.green),
+                  onPressed: _addToCart,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

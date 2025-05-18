@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:marketcheap/Screens/Consumidor/CartScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/DetalleTienda.dart';
+import 'package:marketcheap/Screens/Consumidor/HistorialPedidosScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
 import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
+import 'package:marketcheap/Screens/Consumidor/ValoracionesScreen.dart';
 import 'package:marketcheap/Screens/Proveedor/ConfiguracionProveedor.dart';
 import 'package:marketcheap/Screens/Proveedor/EditarProveedor.dart';
 import 'package:marketcheap/util/firebase_options.dart';
@@ -79,6 +81,8 @@ class MyApp extends StatelessWidget {
           '/agregar_producto': (context) => const AgregarProductoScreen(),
           '/configurar_proveedor': (context) => const ConfiguracionProveedor(),
           '/editar_proveedor': (context) => const EditarProveedor(),
+          '/valoraciones': (context) => const ValoracionesScreen(),
+          '/historial': (context) => const HistorialPedidosScreen(),
           '/detalle_tienda': (context) {
             final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
             final storeName = arguments?['storeName']?.toString() ?? 'Tienda sin nombre';

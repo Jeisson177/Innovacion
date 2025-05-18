@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:marketcheap/Screens/Consumidor/HistorialPedidosScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/InicioScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
 import 'package:marketcheap/LoginScreen.dart'; // Asegúrate de importar tu pantalla de login
-import 'package:marketcheap/Screens/Consumidor/ConfiguracionScreen.dart'; // Asegúrate de importar tu pantalla de configuración
+import 'package:marketcheap/Screens/Consumidor/ConfiguracionScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ValoracionesScreen.dart'; // Asegúrate de importar tu pantalla de configuración
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,6 +23,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _cargarDatosCliente();
+  }
+
+  void _navigateToHistorial(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HistorialPedidosScreen()),
+    );
+  }
+
+  void _navigateToValoraciones(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ValoracionesScreen()),
+    );
   }
 
   Future<void> _cargarDatosCliente() async {
@@ -157,8 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             MaterialPageRoute(builder: (context) => const ConfiguracionScreen()),
                           );
                         }),
-                        _buildServiceButton(Icons.star, "Favoritos", onTap: () {}),
-                        _buildServiceButton(Icons.history, "Historial", onTap: () {}),
+                        _buildServiceButton(Icons.star, "Favoritos", onTap: _navigateToValoraciones),
+                        _buildServiceButton(Icons.history, "Historial", onTap: _navigateToHistorial, ),
                         _buildServiceButton(Icons.notifications, "Notificaciones", onTap: () {}),
                         _buildServiceButton(Icons.logout, "LogOut", isLogout: true, onTap: _logOut),
                       ],
@@ -199,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               BottomNavigationBarItem(
                 icon: Image.asset("assets/icons/ic_favorites.png", width: 24, height: 24),
-                label: "Ofertas",
+                label: "Valoraciones",
               ),
               BottomNavigationBarItem(
                 icon: Image.asset("assets/icons/ic_profile.png", width: 24, height: 24),

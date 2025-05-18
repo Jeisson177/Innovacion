@@ -41,6 +41,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
     );
   }
 
+  
 
   Future<void> _cargarDatos() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
 import 'package:provider/provider.dart';
+import 'PagarScreen.dart'; // Import the new PagarScreen
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -22,7 +23,7 @@ class CartScreen extends StatelessWidget {
       body: Consumer<ShoppingCart>(
         builder: (context, cart, child) {
           if (cart.items.isEmpty) {
-                  return const Center(child: Text('Tu carrito está vacío'));
+            return const Center(child: Text('Tu carrito está vacío'));
           }
 
           return Column(
@@ -83,7 +84,15 @@ class CartScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                       onPressed: () {
-                        // Lógica para pagar
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PagarScreen(
+                              total: cart.total,
+                              items: cart.items,
+                            ),
+                          ),
+                        );
                       },
                       child: const Text('Pagar', style: TextStyle(fontSize: 16)),
                     ),
@@ -177,14 +186,10 @@ class __CartItemState extends State<_CartItem> {
                   onPressed: () {
                     setState(() {
                       if (cantidad == 1) {
-
                         widget.onRemove();
-
-                        
                       } else { 
                         cantidad--;
                         widget.onQuantityChanged(cantidad);
-                        
                       }
                     });
                   },
@@ -211,4 +216,3 @@ class __CartItemState extends State<_CartItem> {
     );
   }
 }
-  
