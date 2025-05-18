@@ -14,20 +14,38 @@ class ValoracionesScreen extends StatefulWidget {
 class _ValoracionesScreenState extends State<ValoracionesScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Pedido> _orders = [];
+  Map<String, double> _userRatings = {}; // Map of productId to user's rating
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadOrders();
+    _loadData();
   }
 
-  Future<void> _loadOrders() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
     });
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Load user's ratings from user_ratings collection
+      final ratingsSnapshot = await _firestore
+          .collection('user_ratings')
+          .doc(userId)
+          .get();
+
+      final ratingsData = ratingsSnapshot.data();
+      final userRatings = <String, double>{};
+      if (ratingsData != null && ratingsData['ratings'] != null) {
+        final ratingsList = ratingsData['ratings'] as List<dynamic>;
+        for (var entry in ratingsList) {
+          userRatings[entry['productId']] = (entry['rating'] as num).toDouble();
+        }
+      }
+
+      // Load orders
       final querySnapshot = await _firestore
           .collection('pedidos')
           .where('userId', isEqualTo: userId)
@@ -35,7 +53,10 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
           .get();
 
       setState(() {
-        _orders = querySnapshot.docs.map((doc) => Pedido.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        _userRatings = userRatings;
+        _orders = querySnapshot.docs
+            .map((doc) => Pedido.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -43,13 +64,16 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al cargar pedidos: $e')),
+        SnackBar(content: Text('Error al cargar datos: $e')),
       );
     }
   }
 
   Future<void> _submitRating(String productId, double rating) async {
     try {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Update product ratings in productos collection
       final productRef = _firestore.collection('productos').doc(productId);
       final productDoc = await productRef.get();
       if (productDoc.exists) {
@@ -57,10 +81,26 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
         List<double> currentRatings = (productData['valoraciones'] as List<dynamic>? ?? []).cast<double>();
         currentRatings.add(rating);
         await productRef.update({'valoraciones': currentRatings});
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Valoración enviada con éxito')),
-        );
       }
+
+      // Update user_ratings to store this rating
+      final userRatingsRef = _firestore.collection('user_ratings').doc(userId);
+      await userRatingsRef.set({
+        'ratings': FieldValue.arrayUnion([
+          {'productId': productId, 'rating': rating}
+        ]),
+      }, SetOptions(merge: true));
+
+      setState(() {
+        _userRatings[productId] = rating; // Update local state
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Valoración enviada con éxito')),
+      );
+
+      // Redirect to InicioScreen
+      Navigator.pushNamedAndRemoveUntil(context, '/inicio', (route) => false);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al enviar valoración: $e')),
@@ -104,6 +144,7 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
                                     final product = item.producto;
                                     return _RatingTile(
                                       product: product,
+                                      userRating: _userRatings[product.id],
                                       onRatingSubmitted: (rating) => _submitRating(product.id, rating),
                                     );
                                   }),
@@ -122,9 +163,14 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
 
 class _RatingTile extends StatefulWidget {
   final Producto product;
+  final double? userRating; // User's existing rating for this product
   final Function(double) onRatingSubmitted;
 
-  const _RatingTile({required this.product, required this.onRatingSubmitted});
+  const _RatingTile({
+    required this.product,
+    required this.onRatingSubmitted,
+    this.userRating,
+  });
 
   @override
   __RatingTileState createState() => __RatingTileState();
@@ -135,6 +181,9 @@ class __RatingTileState extends State<_RatingTile> {
 
   @override
   Widget build(BuildContext context) {
+    final isRated = widget.userRating != null;
+    final displayRating = isRated ? widget.userRating! : _rating;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -142,13 +191,24 @@ class __RatingTileState extends State<_RatingTile> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              widget.product.imagenUrl,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 50),
-            ),
+            child: widget.product.imagenUrl.isNotEmpty
+                ? Image.network(
+                    widget.product.imagenUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image for ${widget.product.nombre}: $error');
+                      return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                  )
+                : const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -156,25 +216,25 @@ class __RatingTileState extends State<_RatingTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(widget.product.nombre, style: const TextStyle(fontSize: 16)),
+                Text(
+                  widget.product.tienda.isNotEmpty ? widget.product.tienda : 'Proveedor no especificado',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
                 const SizedBox(height: 5),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        index < _rating ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                        size: 24,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _rating = (index + 1).toDouble();
-                        });
-                      },
+                    return Icon(
+                      index < displayRating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 24,
                     );
                   }),
                 ),
-                if (_rating > 0)
+                if (!isRated && _rating > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: ElevatedButton(
@@ -192,5 +252,21 @@ class __RatingTileState extends State<_RatingTile> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userRating == null) {
+      _rating = 0.0;
+    }
+  }
+
+  void _updateRating(double newRating) {
+    if (widget.userRating == null) {
+      setState(() {
+        _rating = newRating;
+      });
+    }
   }
 }

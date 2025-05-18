@@ -29,7 +29,6 @@ class _PagarScreenState extends State<PagarScreen> {
     double enteredAmount;
     bool isValid = false;
 
-    // Validate the entered amount based on the selected method
     switch (_selectedMethod) {
       case 'Nequi':
         enteredAmount = double.tryParse(_nequiAmountController.text) ?? 0.0;
@@ -57,7 +56,6 @@ class _PagarScreenState extends State<PagarScreen> {
       return;
     }
 
-    // Update stock in Firestore and save the order
     try {
       for (var item in widget.items) {
         final productRef = FirebaseFirestore.instance.collection('productos').doc(item.producto.id);
@@ -78,25 +76,21 @@ class _PagarScreenState extends State<PagarScreen> {
         }
       }
 
-      // Create a new Pedido instance
       final userId = FirebaseAuth.instance.currentUser!.uid;
       final pedido = Pedido(
-        id: '', // Firestore will generate this
+        id: '',
         userId: userId,
         items: widget.items,
         total: widget.total,
         paymentMethod: _selectedMethod!,
-        timestamp: DateTime.now(), // Using current date/time (May 18, 2025, 12:15 PM -05)
+        timestamp: DateTime.now(),
       );
 
-      // Save order to Firestore
       final docRef = await FirebaseFirestore.instance.collection('pedidos').add(pedido.toMap());
-      await docRef.update({'id': docRef.id}); // Update the document with its own ID
+      await docRef.update({'id': docRef.id});
 
-      // Clear the cart
       Provider.of<ShoppingCart>(context, listen: false).clearCart();
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Compra realizada con éxito'),
@@ -104,7 +98,6 @@ class _PagarScreenState extends State<PagarScreen> {
         ),
       );
 
-      // Navigate back to InicioScreen
       Navigator.pushNamedAndRemoveUntil(context, '/inicio', (route) => false);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

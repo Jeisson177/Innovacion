@@ -280,6 +280,13 @@ class __ProductoTileState extends State<_ProductoTile> {
                       fontSize: 16,
                     ),
                   ),
+                  Text(
+                    widget.product.tienda.isNotEmpty ? widget.product.tienda : 'Proveedor no especificado',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Precio: \$${widget.product.precio.toStringAsFixed(2)}',

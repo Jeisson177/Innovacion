@@ -29,6 +29,8 @@ class Pedido {
         'nombre': item.producto.nombre,
         'cantidad': item.cantidad,
         'precio': item.producto.precio,
+        'tienda': item.producto.tienda, // Ensure tienda is saved
+        'imagenUrl': item.producto.imagenUrl, // Ensure imagenUrl is saved
       }).toList(),
       'total': total,
       'paymentMethod': paymentMethod,
@@ -45,14 +47,16 @@ class Pedido {
         producto: Producto(
           id: item['productoId'],
           nombre: item['nombre'],
-          marca: '',
-          tienda: '',
+          marca: item['marca'] ?? '',
+          tienda: item['tienda'] ?? 'Proveedor no especificado', // Use the stored tienda value
           precio: (item['precio'] as num).toDouble(),
-          descripcion: '',
-          categoria: '',
-          cantidadDisponible: 0,
-          imagenUrl: '',
-          valoraciones: [],
+          descripcion: item['descripcion'] ?? '',
+          categoria: item['categoria'] ?? '',
+          cantidadDisponible: item['cantidadDisponible'] ?? 0,
+          imagenUrl: item['imagenUrl'] ?? '', // Use the stored imagenUrl value
+          valoraciones: item['valoraciones'] != null
+              ? (item['valoraciones'] as List<dynamic>).cast<double>()
+              : [],
         ),
         cantidad: item['cantidad'] as int,
       )).toList(),
