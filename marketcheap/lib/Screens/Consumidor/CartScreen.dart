@@ -83,7 +83,7 @@ class CartScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                       onPressed: () {
-                        // Lógica para pagar
+                        cart.realizarPago(context); // Lógica para pagar
                       },
                       child: const Text('Pagar', style: TextStyle(fontSize: 16)),
                     ),

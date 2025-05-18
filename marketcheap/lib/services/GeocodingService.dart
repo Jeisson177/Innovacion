@@ -16,7 +16,7 @@ class GeocodingService {
     }
   }
 
-  // Convierte coordenadas a dirección textual (opcional)
+  // Convierte coordenadas a dirección textual
   static Future<String?> latLngToAddress(LatLng position) async {
     try {
       final places = await placemarkFromCoordinates(
