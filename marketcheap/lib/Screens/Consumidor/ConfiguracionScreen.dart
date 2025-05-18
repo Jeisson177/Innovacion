@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:marketcheap/Screens/Consumidor/InicioScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/MapScreen.dart';
 import 'package:marketcheap/LoginScreen.dart';
+import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
   const ConfiguracionScreen({super.key});
@@ -17,7 +20,12 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   final _apellidoController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _direccionController = TextEditingController();
+  final _searchController = TextEditingController();
   bool _cargando = true;
+  LatLng _selectedLocation = const LatLng(4.7110, -74.0721); // Default Bogotá coordinates
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  String _selectedAddress = '';
 
   @override
   void initState() {
@@ -25,20 +33,116 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
     _cargarDatos();
   }
 
+
+  void _navigateToProfile(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    );
+  }
+
+
   Future<void> _cargarDatos() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       final doc = await FirebaseFirestore.instance.collection("clientes").doc(uid).get();
       final data = doc.data();
       if (data != null) {
-        _nombreController.text = data['firstName'] ?? '';
-        _apellidoController.text = data['lastName'] ?? '';
-        _telefonoController.text = data['phone'] ?? '';
-        _direccionController.text = data['address'] ?? ''; // Asegúrate de usar 'address' aquí
+        setState(() {
+          _nombreController.text = data['firstName'] ?? '';
+          _apellidoController.text = data['lastName'] ?? '';
+          _telefonoController.text = data['phone'] ?? '';
+          _direccionController.text = data['address'] ?? '';
+          _selectedLocation = LatLng(
+            data['latitud'] ?? 4.7110,
+            data['longitud'] ?? -74.0721,
+          );
+          _selectedAddress = _direccionController.text;
+          _updateMarker(_selectedLocation);
+          if (_mapController != null) {
+            _mapController!.moveCamera(CameraUpdate.newLatLngZoom(_selectedLocation, 13.0));
+          }
+        });
       }
     }
     setState(() {
       _cargando = false;
+    });
+  }
+
+  Future<void> _searchLocation() async {
+    try {
+      final query = _searchController.text.trim();
+      if (query.isNotEmpty) {
+        final locations = await locationFromAddress(query);
+        if (locations.isNotEmpty) {
+          final newLocation = LatLng(locations.first.latitude, locations.first.longitude);
+          setState(() {
+            _selectedLocation = newLocation;
+            _direccionController.text = query;
+            _selectedAddress = query;
+            _updateMarker(_selectedLocation);
+            if (_mapController != null) {
+              _mapController!.moveCamera(CameraUpdate.newLatLngZoom(_selectedLocation, 13.0));
+            }
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al buscar ubicación: $e')),
+      );
+    }
+  }
+
+  Future<void> _updateSelectedAddress(LatLng location) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(location.latitude, location.longitude);
+      if (placemarks.isNotEmpty) {
+        final placemark = placemarks.first;
+        setState(() {
+          _selectedAddress = '${placemark.street}, ${placemark.locality}, ${placemark.country}';
+          _direccionController.text = _selectedAddress;
+        });
+      }
+    } catch (e) {
+      print("Error al obtener dirección: $e");
+      setState(() {
+        _selectedAddress = 'No se pudo obtener la dirección';
+      });
+    }
+  }
+
+  void _updateMarker(LatLng location) {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('selected-location'),
+          position: location,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          onTap: () {
+            if (_mapController != null) {
+              _mapController!.moveCamera(CameraUpdate.newLatLng(location));
+            }
+          },
+        ),
+      };
+    });
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      _mapController = controller;
+      _updateMarker(_selectedLocation);
+      _mapController!.moveCamera(CameraUpdate.newLatLngZoom(_selectedLocation, 13.0));
+    });
+  }
+
+  void _onCameraMove(CameraPosition position) {
+    setState(() {
+      _selectedLocation = position.target;
+      _updateMarker(_selectedLocation);
+      _updateSelectedAddress(_selectedLocation);
     });
   }
 
@@ -49,12 +153,16 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
         'firstName': _nombreController.text,
         'lastName': _apellidoController.text,
         'phone': _telefonoController.text,
-        'address': _direccionController.text, // Asegúrate de usar 'address' aquí
+        'address': _direccionController.text,
+        'latitud': _selectedLocation.latitude,
+        'longitud': _selectedLocation.longitude,
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Datos actualizados exitosamente")),
       );
+      _navigateToProfile();
     }
+        
   }
 
   Future<void> _eliminarCuenta() async {
@@ -95,36 +203,70 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context); // Volver a la pantalla anterior
+            Navigator.pop(context);
           },
         ),
-        title: const Text("Configuración"),
+        title: const Text("Configuración", style: TextStyle(color: Colors.white)),
         backgroundColor: const Color.fromARGB(255, 40, 132, 44),
       ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  const Text(
-                    "Editar Perfil",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildTextField(_nombreController, "Nombre"),
-                  const SizedBox(height: 10),
-                  _buildTextField(_apellidoController, "Apellido"),
-                  const SizedBox(height: 10),
-                  _buildTextField(_telefonoController, "Teléfono"),
-                  const SizedBox(height: 10),
-                  _buildTextField(_direccionController, "Dirección de entrega"),
-                  const SizedBox(height: 30),
-                  _buildRoundedButton("Guardar cambios", _guardarCambios),
-                  const SizedBox(height: 20),
-                  _buildRoundedButton("Eliminar cuenta", _eliminarCuenta, isDelete: true),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    const Text(
+                      "Editar Perfil",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(_nombreController, "Nombre"),
+                    const SizedBox(height: 10),
+                    _buildTextField(_apellidoController, "Apellido"),
+                    const SizedBox(height: 10),
+                    _buildTextField(_telefonoController, "Teléfono"),
+                    const SizedBox(height: 10),
+                    _buildTextField(_direccionController, "Dirección de entrega"),
+                    const SizedBox(height: 10),
+                    _buildTextField(_searchController, "Buscar dirección", suffixIcon: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: _searchLocation,
+                    )),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 200,
+                      child: GoogleMap(
+                        onMapCreated: _onMapCreated,
+                        initialCameraPosition: CameraPosition(
+                          target: _selectedLocation,
+                          zoom: 13.0,
+                        ),
+                        onCameraMove: _onCameraMove,
+                        markers: _markers,
+                        mapType: MapType.normal,
+                        myLocationButtonEnabled: true,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      _selectedAddress.isNotEmpty ? _selectedAddress : 'Selecciona una ubicación en el mapa',
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 30),
+                    Center(
+                      child: Column(
+                        children: [
+                          _buildRoundedButton("Guardar cambios", _guardarCambios),
+                          const SizedBox(height: 20),
+                          _buildRoundedButton("Eliminar cuenta", _eliminarCuenta, isDelete: true),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
       bottomNavigationBar: Stack(
@@ -172,10 +314,13 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label) {
+  Widget _buildTextField(TextEditingController controller, String label, {Widget? suffixIcon}) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: suffixIcon,
+      ),
     );
   }
 
@@ -201,5 +346,16 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _apellidoController.dispose();
+    _telefonoController.dispose();
+    _direccionController.dispose();
+    _searchController.dispose();
+    _mapController?.dispose();
+    super.dispose();
   }
 }

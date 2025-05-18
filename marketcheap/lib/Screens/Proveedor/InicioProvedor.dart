@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:marketcheap/entities/Producto.dart';
-import 'package:marketcheap/services/ProductoService.dart';  // Asegúrate de tener la clase Producto
+import 'package:marketcheap/services/ProductoService.dart';
 
 class InicioProveedor extends StatefulWidget {
   const InicioProveedor({super.key});
@@ -21,41 +21,33 @@ class _InicioProveedorState extends State<InicioProveedor> {
     _loadProductos();
   }
 
-  // Cargar los productos del proveedor
   Future<void> _loadProductos() async {
-  try {
-    // Obtener el UID del proveedor autenticado
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    if (uid == null) {
-      print("No hay proveedor autenticado.");
-      return;
+      if (uid == null) {
+        print("No hay proveedor autenticado.");
+        return;
+      }
+
+      final doc = await FirebaseFirestore.instance.collection('proveedores').doc(uid).get();
+      final nombreTienda = doc['storeName'];
+
+      List<Producto> productos = await _productoService.getProductos(tienda: nombreTienda);
+
+      setState(() {
+        _productos = productos;
+      });
+    } catch (e) {
+      print("Error al cargar productos: $e");
     }
-
-    // Obtener nombre de la tienda desde Firestore
-    final doc = await FirebaseFirestore.instance.collection('proveedores').doc(uid).get();
-    final nombreTienda = doc['storeName'];
-
-    // Obtener productos que pertenezcan a esa tienda
-    List<Producto> productos = await _productoService.getProductos(tienda: nombreTienda);
-
-    setState(() {
-      _productos = productos;
-    });
-  } catch (e) {
-    print("Error al cargar productos: $e");
   }
-}
 
-  // Pantalla de agregar producto
   void _navigateToAgregarProducto() async {
-  final result = await Navigator.pushNamed(context, '/agregar_producto');
-  
+    await Navigator.pushNamed(context, '/agregar_producto');
     _loadProductos();
-  
-}
+  }
 
-  // Eliminar producto
   Future<void> _deleteProducto(String productoId) async {
     try {
       await _productoService.deleteProducto(productoId);
@@ -72,15 +64,35 @@ class _InicioProveedorState extends State<InicioProveedor> {
     }
   }
 
+  void _navigateToEditarProducto(Producto producto) {
+    Navigator.pushNamed(
+      context,
+      '/editar_producto',
+      arguments: producto,
+    ).then((_) {
+      _loadProductos();
+    });
+  }
+
+  void _navigateToConfiguracionProveedor() {
+    Navigator.pushNamed(context, '/configurar_proveedor');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inicio Proveedor'),
+        backgroundColor: Colors.green,
+        title: const Text('Inicio Proveedor'
+        ,style: TextStyle(color: Colors.white),
+        )        ,        
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: _navigateToAgregarProducto,  // Navegar a la pantalla para agregar productos
+            onPressed: _navigateToAgregarProducto,
+            style: IconButton.styleFrom(
+              foregroundColor: Colors.white,
+            ),
           ),
         ],
       ),
@@ -117,7 +129,7 @@ class _InicioProveedorState extends State<InicioProveedor> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () =>_navigateToEditarProducto(producto),
+                                  onPressed: () => _navigateToEditarProducto(producto),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete),
@@ -125,8 +137,7 @@ class _InicioProveedorState extends State<InicioProveedor> {
                                     _deleteProducto(producto.id);
                                   },
                                 ),
-                              ]
-
+                              ],
                             ),
                           ),
                         );
@@ -137,113 +148,25 @@ class _InicioProveedorState extends State<InicioProveedor> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Inicio',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.delete_forever, color: Colors.red),
-          label: 'Eliminar Cuenta',
-        ),
-      ],
-      onTap: (index) {
-        if (index == 1) {
-          _eliminarCuenta();
-        }
-      },
-    ),
-
-
-    );
-  }
-  // Navegar a la pantalla de edición de producto
-  void _navigateToEditarProducto(Producto producto) {
-    Navigator.pushNamed(
-      context,
-      '/editar_producto', 
-      arguments: producto, 
-    ).then((_) {
-      _loadProductos();
-    });
-  }
-  //eliminar cuenta desde inicio , se puede cambiar despues
-
-  Future<void> _eliminarCuenta() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar eliminación'),
-        content: const Text('¿Estás seguro de que quieres eliminar tu cuenta permanentemente? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+        backgroundColor: Colors.green,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Configuración de proveedor',
           ),
         ],
+        onTap: (index) {
+          if (index == 1) {
+            _navigateToConfiguracionProveedor();
+          }
+        },
       ),
     );
-
-    if (confirm == true) {
-      try {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          // Primero eliminar los productos asociados a esta tienda
-          final doc = await FirebaseFirestore.instance
-              .collection('proveedores')
-              .doc(user.uid)
-              .get();
-          
-          final storeName = doc['storeName'];
-          
-          // Eliminar todos los productos de esta tienda
-          final querySnapshot = await FirebaseFirestore.instance
-              .collection('productos')
-              .where('tienda', isEqualTo: storeName)
-              .get();
-          
-          final batch = FirebaseFirestore.instance.batch();
-          for (var doc in querySnapshot.docs) {
-            batch.delete(doc.reference);
-          }
-          await batch.commit();
-          
-          // Luego eliminar el documento del proveedor
-          await FirebaseFirestore.instance
-              .collection('proveedores')
-              .doc(user.uid)
-              .delete();
-          
-          // Finalmente eliminar la cuenta de autenticación
-          await user.delete();
-          
-          // Cerrar sesión y redirigir al login
-          await FirebaseAuth.instance.signOut();
-          
-          if (mounted) {
-            Navigator.pushNamedAndRemoveUntil(
-              context, 
-              '/login', 
-              (route) => false
-            );
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cuenta eliminada permanentemente')),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al eliminar cuenta: $e')),
-          );
-        }
-      }
-    }
   }
-
-
 }

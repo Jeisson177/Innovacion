@@ -7,6 +7,8 @@ import 'package:marketcheap/Screens/Consumidor/OfertasScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ProfileScreen.dart';
 import 'package:marketcheap/RegisterScreen.dart';
 import 'package:marketcheap/Screens/Consumidor/ShoppinfCart.dart';
+import 'package:marketcheap/Screens/Proveedor/ConfiguracionProveedor.dart';
+import 'package:marketcheap/Screens/Proveedor/EditarProveedor.dart';
 import 'package:marketcheap/util/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'LoginScreen.dart';
@@ -77,6 +79,11 @@ class MyApp extends StatelessWidget {
           '/perfil': (context) => const ProfileScreen(),
           '/provider_home': (context) => const InicioProveedor(),
           '/agregar_producto': (context) => const AgregarProductoScreen(),
+          '/configurar_proveedor': (context) => const ConfiguracionProveedor(),
+          '/editar_proveedor': (context) => const EditarProveedor(),
+          
+          
+          
         
           '/configurar_perfil': (context) => const ConfiguracionScreen(),
            
