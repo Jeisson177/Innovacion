@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_place/google_place.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -26,6 +27,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     googlePlace = GooglePlace("AIzaSyBthbDFH1bk6xgpb4Uyd3Fei-EpaAxxwi8"); // Usa tu API key real
     _determinePosition();
+    _fetchProviderMarkers();
   }
 
   Future<void> _determinePosition() async {
@@ -33,6 +35,34 @@ class _MapScreenState extends State<MapScreen> {
     final position = await Geolocator.getCurrentPosition();
     setState(() {
       _initialPosition = LatLng(position.latitude, position.longitude);
+    });
+  }
+
+  void _fetchProviderMarkers() {
+    // Escuchar cambios en la colección de proveedores
+    FirebaseFirestore.instance.collection('proveedores').snapshots().listen((snapshot) {
+      setState(() {
+        // Filtrar marcadores que no sean de proveedores para preservarlos
+        _markers.removeWhere((marker) => marker.markerId.value.startsWith('proveedor_'));
+        // Agregar marcadores de proveedores
+        for (var doc in snapshot.docs) {
+          final data = doc.data();
+          final lat = data['ubicacion']?['lat'] as double?;
+          final lng = data['ubicacion']?['lng'] as double?;
+          final storeName = data['storeName'] as String?;
+          if (lat != null && lng != null && storeName != null) {
+            _markers.add(Marker(
+              markerId: MarkerId('proveedor_${doc.id}'),
+              position: LatLng(lat, lng),
+              infoWindow: InfoWindow(
+                title: storeName,
+                snippet: data['storeDescription'] ?? 'Sin descripción',
+              ),
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            ));
+          }
+        }
+      });
     });
   }
 
@@ -70,17 +100,17 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _searchController.clear();
         _predictions.clear();
-        _markers.clear();
         _circles.clear();
 
+        _markers.removeWhere((marker) => marker.markerId.value == 'selected_place');
         _markers.add(Marker(
-          markerId: MarkerId("selected_place"),
+          markerId: const MarkerId("selected_place"),
           position: target,
           infoWindow: InfoWindow(title: detail!.result!.name),
         ));
 
         _circles.add(Circle(
-          circleId: CircleId("area_circle"),
+          circleId: const CircleId("area_circle"),
           center: target,
           radius: 500,
           fillColor: Colors.blue.withOpacity(0.2),

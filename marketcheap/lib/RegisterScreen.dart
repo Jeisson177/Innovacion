@@ -133,6 +133,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Image.asset('assets/icons/ic_marketcheap_logo.png', height: 100),
                 const SizedBox(height: 10),
                 const Text('Crear Cuenta', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                DropdownButton<String>(
+                  value: _selectedRole,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedRole = newValue!;
+                    });
+                  },
+                  items: <String>['cliente', 'proveedor']
+                      .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value.capitalize())))
+                      .toList(),
+                ),
                 const SizedBox(height: 30),
                 _buildTextField(_emailController, 'Correo electrónico', false),
                 const SizedBox(height: 20),
@@ -195,19 +208,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 20),
                   _buildTextField(_storeDescriptionController, 'Descripción de la tienda', false),
                 ],
-                const SizedBox(height: 20),
-                DropdownButton<String>(
-                  value: _selectedRole,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedRole = newValue!;
-                    });
-                  },
-                  items: <String>['cliente', 'proveedor']
-                      .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value.capitalize())))
-                      .toList(),
-                ),
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: _register,
