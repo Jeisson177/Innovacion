@@ -20,6 +20,8 @@ import 'Screens/Proveedor/InicioProvedor.dart';
 import 'Screens/Proveedor/AgregarProductoScreen.dart';
 import 'Screens/Consumidor/ConfiguracionScreen.dart';
 import 'Screens/Proveedor/EditarProductoScreen.dart';
+import 'entities/Producto.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,6 +91,11 @@ class MyApp extends StatelessWidget {
             return DetalleTienda(storeName: storeName);
           },
           '/configurar_perfil': (context) => const ConfiguracionScreen(),
+          '/editar_producto': (context) {
+            final producto = ModalRoute.of(context)!.settings.arguments as Producto;
+            return EditarProductoScreen(producto: producto);
+          },
+
         },
       ),
     );
