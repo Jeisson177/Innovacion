@@ -113,7 +113,7 @@ class _ValoracionesScreenState extends State<ValoracionesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Valorar Productos'),
-        backgroundColor: const Color.fromARGB(255, 98, 195, 107),
+        backgroundColor: const Color(0xFF6BCB77),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -180,10 +180,23 @@ class __RatingTileState extends State<_RatingTile> {
   double _rating = 0.0;
 
   @override
-  Widget build(BuildContext context) {
-    final isRated = widget.userRating != null;
-    final displayRating = isRated ? widget.userRating! : _rating;
+  void initState() {
+    super.initState();
+    if (widget.userRating != null) {
+      _rating = widget.userRating!;
+    }
+  }
 
+  void _updateRating(double newRating) {
+    if (widget.userRating == null) {
+      setState(() {
+        _rating = newRating;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -227,20 +240,27 @@ class __RatingTileState extends State<_RatingTile> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(5, (index) {
-                    return Icon(
-                      index < displayRating ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
-                      size: 24,
+                    return IconButton(
+                      icon: Icon(
+                        index < _rating ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                        size: 24,
+                      ),
+                      onPressed: widget.userRating == null
+                          ? () {
+                              _updateRating((index + 1).toDouble());
+                            }
+                          : null,
                     );
                   }),
                 ),
-                if (!isRated && _rating > 0)
+                if (widget.userRating == null && _rating > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),
                     child: ElevatedButton(
                       onPressed: () => widget.onRatingSubmitted(_rating),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 98, 195, 107),
+                        backgroundColor: const Color(0xFF6BCB77),
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                       ),
                       child: const Text('Enviar Valoración', style: TextStyle(color: Colors.white, fontSize: 12)),
@@ -252,21 +272,5 @@ class __RatingTileState extends State<_RatingTile> {
         ],
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.userRating == null) {
-      _rating = 0.0;
-    }
-  }
-
-  void _updateRating(double newRating) {
-    if (widget.userRating == null) {
-      setState(() {
-        _rating = newRating;
-      });
-    }
   }
 }

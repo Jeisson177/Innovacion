@@ -16,22 +16,37 @@ class InicioScreen extends StatefulWidget {
 class _InicioScreenState extends State<InicioScreen> {
   final ProductoService _productoService = ProductoService();
   List<Producto> _productos = [];
+  List<Producto> _filteredProductos = []; // List for filtered products
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadProductos();
+    _searchController.addListener(_filterProductos); // Listen to search input
   }
 
-  // Cargar los productos desde Firestore
+  // Load products from Firestore
   Future<void> _loadProductos() async {
     List<Producto> productos = await _productoService.getProductos();
     setState(() {
       _productos = productos;
+      _filteredProductos = productos; // Initialize filtered list
     });
   }
 
-  // Obtener la dirección del usuario desde Firestore
+  // Filter products based on search query
+  void _filterProductos() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredProductos = _productos.where((producto) {
+        return producto.nombre.toLowerCase().contains(query) ||
+               producto.tienda.toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
+  // Get user address from Firestore
   Future<String?> _obtenerDireccion() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return null;
@@ -45,12 +60,18 @@ class _InicioScreenState extends State<InicioScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose(); // Clean up controller
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar con dirección dinámica
+            // Top bar with dynamic address
             Container(
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
@@ -108,8 +129,9 @@ class _InicioScreenState extends State<InicioScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const TextField(
-                decoration: InputDecoration(
+              child: TextField(
+                controller: _searchController, // Attach controller
+                decoration: const InputDecoration(
                   hintText: 'Ingrese producto/tienda',
                   contentPadding: EdgeInsets.all(10),
                   border: InputBorder.none,
@@ -144,13 +166,13 @@ class _InicioScreenState extends State<InicioScreen> {
               ),
             ),
 
-            // Lista de productos
+            // Product list
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(10),
-                itemCount: _productos.length,
+                itemCount: _filteredProductos.length, // Use filtered list
                 itemBuilder: (context, index) {
-                  return _ProductoTile(product: _productos[index]);
+                  return _ProductoTile(product: _filteredProductos[index]);
                 },
               ),
             ),
@@ -172,7 +194,7 @@ class _InicioScreenState extends State<InicioScreen> {
                   _navButton(
                     context,
                     iconPath: 'assets/icons/ic_home.png',
-                    onTap: () {}, // Ya estás en inicio
+                    onTap: () {}, // Already on home
                   ),
                   _navButton(
                     context,
@@ -232,7 +254,7 @@ class __ProductoTileState extends State<_ProductoTile> {
   @override
   void initState() {
     super.initState();
-    quantity = 1; // Default quantity when adding
+    quantity = 1; // Default quantity
   }
 
   void _addToCart() {
